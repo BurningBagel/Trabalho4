@@ -1,0 +1,17 @@
+int func1(int 2a){
+	{
+		int d;
+	}
+	int return a + 2 + d;
+}
+
+
+erro func2(int b){
+	return b * a;
+}
+
+float func3(int c){
+	return c / b;
+}
+
+

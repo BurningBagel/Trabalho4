@@ -1,0 +1,23 @@
+int func1(set a){
+	a = EMPTY;
+	int b;
+	int c;
+	int x;
+	b = 4;
+	c = 4;
+	add(b in a);
+	if(is_set(a) && exists(b in a)){
+		remove(b in a);
+		add(c in a);
+	}
+	
+	forall(x in a){
+		remove(x in a);
+	}
+	
+	
+	return exists(b in a);
+
+
+
+}

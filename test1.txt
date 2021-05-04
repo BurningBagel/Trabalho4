@@ -1,0 +1,18 @@
+int func1(int a){
+	return a + 2;
+}
+
+
+int func2(int b){
+	return b * 2;
+}
+
+float func3(int c){
+	return c / 4;
+}
+
+
+float func4(int d){
+	return (d+(2 * 3 - (d + 4)));
+}
+
