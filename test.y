@@ -1932,7 +1932,7 @@ function_call:
 																				if((*ancora).refereTabela->numArgs != calledArgs){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
 																				}
-																				if(!VerificaTipoArgs($3,(*ancoraSimb).refereTabela->funcArgsTypes,0)){
+																				if(!VerificaTipoArgs($3,(*ancoraSimb).funcArgsTypes,0)){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA ARGUMENTOS DE TIPOS ERRADOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
 
 																				}
