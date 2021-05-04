@@ -61,8 +61,8 @@ void PreencheFuncArgs(no* alvo, int num, int* vector){
 	}
 }
 
-int ContaFuncCallArgs(no* alvo){
-	if((*alvo).tipo == YYSYMBOL_args){
+int ContaFuncArgs(no* alvo){
+	if(!strcmp((*alvo).nome,"mathop")){
 		return 1 + ContaFuncArgs((*alvo).filhos[1]);
 	}
 	else{
@@ -79,6 +79,7 @@ int ContaFuncArgs(no* alvo){
 	if(!strcmp((*alvo).nome,"epsilon")) return 0;
 	else if (!strcmp((*alvo).nome,"single")) return 1;
 	else return 1 + ContaFuncArgs((*alvo).filhos[1]);
+	return 0;
 }
 
 char* ConverteRetornoTipoString(int entrada){
@@ -1930,7 +1931,7 @@ function_call:
 																				if((*ancora).refereTabela->numArgs != calledArgs){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
 																				}
-																				if(!VerificaTipoArgs($3,(*ancora).refereTabela->funcArgsTypes,0)){
+																				if(!VerificaTipoArgs($3,(*ancoraSimb).refereTabela->funcArgsTypes,0)){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA ARGUMENTOS DE TIPOS ERRADOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
 
 																				}
@@ -2155,8 +2156,8 @@ function_declaration:
 																				}
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
-																					(*ancora).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
-																					PreencheFuncArgs($5,0,(*ancora).funcArgsTypes);
+																					(*ancoraSimb).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
+																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes);
 																				}
 																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
@@ -2198,8 +2199,8 @@ function_declaration:
 																				}
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
-																					(*ancora).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
-																					PreencheFuncArgs($5,0,(*ancora).funcArgsTypes);
+																					(*ancoraSimb).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
+																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes);
 																				}
 																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
