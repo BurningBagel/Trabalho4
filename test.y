@@ -61,18 +61,19 @@ void PreencheFuncArgs(no* alvo, int num, int* vector){
 	}
 }
 
-int ContaFuncArgs(no* alvo){
+int ContaCallArgs(no* alvo){
 	if(!strcmp((*alvo).nome,"mathop")){
-		return 1 + ContaFuncArgs((*alvo).filhos[1]);
+		return 1 + ContaCallArgs((*alvo).filhos[1]);
 	}
 	else{
 		if(!strcmp((*alvo).nome,"comma")){
-			return ContaFuncArgs((*alvo).filhos[1]);
+			return ContaCallArgs((*alvo).filhos[1]);
 		}
 		else{
 			return 0;
 		}
 	}
+	return 0;
 }
 
 int ContaFuncArgs(no* alvo){
@@ -1927,7 +1928,7 @@ function_call:
 																					(*ancora).refereTabela = NULL;
 																					(*ancora).tipoVirtual = 0;
 																				}
-																				int calledArgs = ContaFuncArgs();
+																				int calledArgs = ContaCallArgs($3);
 																				if((*ancora).refereTabela->numArgs != calledArgs){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
 																				}
@@ -1954,11 +1955,13 @@ function_call:
 																					(*ancora).tipoVirtual = (*ancoraSimb).returnType;
 																				}
 																				else{
-																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
+																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
 																					(*ancora).refereTabela = NULL;
 																					(*ancora).tipoVirtual = 0;
 																				}
-																				if((*ancoraSimb).)
+																				if((*ancoraSimb).numArgs != 0){
+																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																				}
 																				(*ancora).conversion = None;
 																				$$ = ancora;
 																				$1 = NULL;
