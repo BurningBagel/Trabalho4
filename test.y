@@ -32,6 +32,55 @@ pilha* pilhaEscopo;
 int escopoCounter;
 
 
+int VerificaTipoArgs(no* alvo, int* vector, int profund){
+	int result;
+	no* next;
+
+	result = (vector[profund] != (*alvo).tipoVirtual);
+
+	if(!strcmp((*alvo).filhos[1]->nome,"comma")){
+		next = (*alvo).filhos[1]->filhos[1];
+		return result && VerificaTipoArgs(next,vector,profund+1);
+	}
+	else {
+		return result;
+	}
+	
+}
+
+
+void PreencheFuncArgs(no* alvo, int num, int* vector){
+	if(num == 0) return;
+	else if (!strcmp((*alvo).nome,"single")){
+		vector[num] = (*alvo).filhos[0]->tipoVirtual;
+		return;
+	}
+	else{
+		vector[num] = (*alvo).filhos[0]->tipoVirtual;
+		PreencheFuncArgs((*alvo).filhos[1],num + 1,vector);
+	}
+}
+
+int ContaFuncCallArgs(no* alvo){
+	if((*alvo).tipo == YYSYMBOL_args){
+		return 1 + ContaFuncArgs((*alvo).filhos[1]);
+	}
+	else{
+		if(!strcmp((*alvo).nome,"comma")){
+			return ContaFuncArgs((*alvo).filhos[1]);
+		}
+		else{
+			return 0;
+		}
+	}
+}
+
+int ContaFuncArgs(no* alvo){
+	if(!strcmp((*alvo).nome,"epsilon")) return 0;
+	else if (!strcmp((*alvo).nome,"single")) return 1;
+	else return 1 + ContaFuncArgs((*alvo).filhos[1]);
+}
+
 char* ConverteRetornoTipoString(int entrada){
 	char* resultado;
 	if(entrada == Int){
@@ -185,6 +234,8 @@ simbolo* CriarSimbolo(char* nome, int tipo, char* valor, int escopo){
 	(*ancora).nome = strdup(nome);
 	(*ancora).escopo = escopo;
 	(*ancora).returnType = Untyped;
+	(*ancora).funcArgsTypes = NULL;
+	(*ancora).numArgs = 0;
 	topo = ancora;
 	return ancora;
 }
@@ -1871,15 +1922,47 @@ function_call:
 																					(*ancora).tipoVirtual = (*ancoraSimb).returnType;
 																				}
 																				else{
-																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
+																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
 																					(*ancora).refereTabela = NULL;
 																					(*ancora).tipoVirtual = 0;
+																				}
+																				int calledArgs = ContaFuncArgs();
+																				if((*ancora).refereTabela->numArgs != calledArgs){
+																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																				}
+																				if(!VerificaTipoArgs($3,(*ancora).refereTabela->funcArgsTypes,0)){
+																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA ARGUMENTOS DE TIPOS ERRADOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+
 																				}
 																				(*ancora).conversion = None;
 																				$$ = ancora;
 																				$1 = NULL;
 																				$2 = NULL;
 																				$4 = NULL;
+																			}
+	|	ID OPENPAR CLOSEPAR													{
+																				no* ancora = (no*)malloc(sizeof(no));
+																				(*ancora).numFilhos = 0;
+																				(*ancora).tipo = YYSYMBOL_function_call;
+																				char ancora2[] = "function_call";
+																				(*ancora).nome = strdup(ancora2);
+																				(*ancora).valor = strdup($1);
+																				simbolo *ancoraSimb = VerificarEscopo($1);
+																				if(ancoraSimb != NULL){ 
+																					(*ancora).refereTabela = ancoraSimb;
+																					(*ancora).tipoVirtual = (*ancoraSimb).returnType;
+																				}
+																				else{
+																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
+																					(*ancora).refereTabela = NULL;
+																					(*ancora).tipoVirtual = 0;
+																				}
+																				if((*ancoraSimb).)
+																				(*ancora).conversion = None;
+																				$$ = ancora;
+																				$1 = NULL;
+																				$2 = NULL;
+																				$3 = NULL;
 																			}
 	;
 
@@ -1891,7 +1974,7 @@ function_call:
 	;
 */
 args:
-			mathop args1	{
+		mathop args1		{
 								no* ancora = (no*)malloc(sizeof(no));
 								(*ancora).numFilhos = 2;
 								(*ancora).filhos[0] = $1;
@@ -1902,7 +1985,7 @@ args:
 								(*ancora).refereTabela = NULL;
 								(*ancora).valor = strdup(($1)->valor);
 								(*ancora).conversion = None;
-								(*ancora).tipoVirtual = 0;
+								(*ancora).tipoVirtual = ($1)->tipoVirtual;
 								$$ = ancora;
 							}
 		/*|	num args1		{	
@@ -2045,6 +2128,8 @@ function_declaration:
 																				Push(pilhaEscopo,CriarStack(escopoCounter));
 																			}
 		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
+																				int numArgumentos;
+																				numArgumentos = ContaFuncArgs($5);
 																				$4 = NULL;
 																				$6 = NULL;
 																				$7 = NULL;
@@ -2057,7 +2142,7 @@ function_declaration:
 																				(*ancora).filhos[1] = $5;
 																				(*ancora).filhos[2] = $8;
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
-																				char ancora2[] = "function_declaration";
+																				char ancora2[] = "type";
 																				(*ancora).nome = strdup(ancora2);
 																				simbolo *ancoraSimb = ProcurarTabela($2);
 																				Pop(pilhaEscopo);
@@ -2068,6 +2153,12 @@ function_declaration:
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,tipoRetorno);
 																				}
+																				if(numArgumentos > 0){
+																					ancoraSimb = (*ancora).refereTabela;
+																					(*ancora).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
+																					PreencheFuncArgs($5,0,(*ancora).funcArgsTypes);
+																				}
+																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
 																				free($2);
 																				(*ancora).conversion = None;
@@ -2081,6 +2172,8 @@ function_declaration:
 																				Push(pilhaEscopo,CriarStack(escopoCounter));
 																			}
 		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
+																				int numArgumentos;
+																				numArgumentos = ContaFuncArgs($5);
 																				$1 = NULL;
 																				$4 = NULL;
 																				$6 = NULL;
@@ -2092,7 +2185,7 @@ function_declaration:
 																				(*ancora).filhos[0] = $5;
 																				(*ancora).filhos[1] = $8;
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
-																				char ancora2[] = "function_declaration";
+																				char ancora2[] = "void";
 																				(*ancora).nome = strdup(ancora2);
 																				simbolo *ancoraSimb = ProcurarTabela($2);
 																				Pop(pilhaEscopo);
@@ -2103,6 +2196,12 @@ function_declaration:
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,Void);
 																				}
+																				if(numArgumentos > 0){
+																					ancoraSimb = (*ancora).refereTabela;
+																					(*ancora).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
+																					PreencheFuncArgs($5,0,(*ancora).funcArgsTypes);
+																				}
+																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
 																				free($2);
 																				(*ancora).conversion = None;
