@@ -2,12 +2,21 @@ enum typeConversion{None, IntToFloatLeft, IntToFloatRight, IntToFloatBoth, Float
 
 enum typeVirtual{Untyped, Void, Int, Float, Elem, Set};
 
+#define CHAR_TABLE 2
+#define INT_TABLE 3
+#define FLOAT_TABLE 4
+#define STRING_TABLE 5
+#define FUNC_TABLE 6
+#define ELEM_TABLE 7
+#define SET_TABLE 8
+
 typedef struct simbolo{				//elemento da tabela de simbolos. Contém ponteiros para os simbolos seguinte e anterior, o nome do simbolo, o valor associado a ele(em string,se tiver), qual tipo
 
 	struct simbolo* anterior;		//de simbolo é (vide defines acima), e o tamanho do valor(caso exista)
 	struct simbolo* seguinte;
 	char *nome;
 	char *valor;
+	int ordemFuncArgs;
 	int tipo;
 	int tamanhoValor;
 	int escopo;
@@ -37,3 +46,4 @@ typedef struct pilha{
 	struct pilha* anterior;
 	int valor;
 } pilha;
+

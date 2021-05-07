@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "definicoes.h"
+#include "tac.c"
 
 extern FILE *yyin;
 extern int linhaCount;
@@ -14,22 +15,15 @@ int yylex(void);
 
 
 //#define ID 1
-#define CHAR_TABLE 2
-#define INT_TABLE 3
-#define FLOAT_TABLE 4
-#define STRING_TABLE 5
-#define FUNC_TABLE 6
-#define ELEM_TABLE 7
-#define SET_TABLE 8
-
-
 
 simbolo* tabelaSimbolos;
 simbolo* topo;
 no* raiz;
 pilha* pilhaEscopo;
+int errorCheck;
 
 int escopoCounter;
+int funcArgsCounter;
 
 
 int VerificaTipoArgs(no* alvo, int* vector, int profund){
@@ -193,6 +187,7 @@ int DecideConversao(int tipo1, int tipo2, int tipoAlvo){//Precisamos de uma fun�
 	}
 	
 	printf("ERRO SEMANTICO! NAO CONSEGUI DETERMINAR COMO CONVERTER! Linha: %d, Coluna: %d\n",linhaCount,colunaCount);
+	errorCheck = TRUE;
 	return 99;
 
 }
@@ -590,6 +585,7 @@ inicio:
 													//(*raiz).escopo = 1;
 													if(ProcurarTabela("main") == NULL){
 														printf("ERRO SEMANTICO! NAO FOI DECLARADA UMA FUNCAO MAIN!\n");
+														errorCheck = TRUE;
 													}
 												}
 	;
@@ -599,248 +595,142 @@ inicio:
 
 
 statement: 
-		single_line_statement statement 		{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$2).escopo = (*ancora).escopo;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "single_line_statement";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-													$$ = ancora;
-												}
+		single_line_statement statement 					{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).filhos[0] = $1;
+																(*ancora).filhos[1] = $2;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$2).escopo = (*ancora).escopo;
+																(*ancora).numFilhos = 2;
+																char ancora2[] = "single_line_statement";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+																$$ = ancora;
+															}
 	|	OPENCURLY 
-												{
-													escopoCounter++;
-													Push(pilhaEscopo,CriarStack(escopoCounter));
-													$1 = NULL;
-												} 
-		statement CLOSECURLY 					{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $3;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$2).escopo = (*ancora).escopo;
-													(*ancora).numFilhos = 1;
-													char ancora2[] = "curly";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													// $ 3 = NULL;
-													$4 = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-													Pop(pilhaEscopo);
-												}
+															{
+																escopoCounter++;
+																Push(pilhaEscopo,CriarStack(escopoCounter));
+																$1 = NULL;
+															} 
+		statement CLOSECURLY 								{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).filhos[0] = $3;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$2).escopo = (*ancora).escopo;
+																(*ancora).numFilhos = 1;
+																char ancora2[] = "curly";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																$$ = ancora;
+																// $ 3 = NULL;
+																$4 = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+																Pop(pilhaEscopo);
+															}
 		
-	|	function_declaration statement 			{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$2).escopo = (*ancora).escopo;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "function_declaration";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-													$$ = ancora;
-												}
+	|	function_declaration statement 						{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).filhos[0] = $1;
+																(*ancora).filhos[1] = $2;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$2).escopo = (*ancora).escopo;
+																(*ancora).numFilhos = 2;
+																char ancora2[] = "function_declaration";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+																$$ = ancora;
+															}
 	
-	
-	/*|	mathop SEMICOLON statement				{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "mathop";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-												}
-	*/
-	
-	|	for statement							{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$2).escopo = (*ancora).escopo;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "for";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-													$$ = ancora;
-												}
-	|	if statement							{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$2).escopo = (*ancora).escopo;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "if";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-													$$ = ancora;
-												}
-	|	iteracao statement 						{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).numFilhos = 2;
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$2).escopo = (*ancora).escopo;
-													(*ancora).tipo = YYSYMBOL_statement;
-													char ancora2[] = "iteracao";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-													$$ = ancora;
-												}
+	|	for statement										{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).filhos[0] = $1;
+																(*ancora).filhos[1] = $2;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$2).escopo = (*ancora).escopo;
+																(*ancora).numFilhos = 2;
+																char ancora2[] = "for";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+																$$ = ancora;
+															}
+	|	if statement										{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).filhos[0] = $1;
+																(*ancora).filhos[1] = $2;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$2).escopo = (*ancora).escopo;
+																(*ancora).numFilhos = 2;
+																char ancora2[] = "if";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+																$$ = ancora;
+															}
+	|	iteracao statement 									{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).numFilhos = 2;
+																(*ancora).filhos[0] = $1;
+																(*ancora).filhos[1] = $2;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$2).escopo = (*ancora).escopo;
+																(*ancora).tipo = YYSYMBOL_statement;
+																char ancora2[] = "iteracao";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+																$$ = ancora;
+															}
 	|	variable_declaration SEMICOLON statement 			{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													//(*(no*)$1).escopo = (*ancora).escopo;
-													//(*(no*)$3).escopo = (*ancora).escopo;
-													char ancora2[] = "variable_declaration";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													$2 = NULL;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-												}
-	/*
-	|	assignment SEMICOLON statement			{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "assignment";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													free($2);
-												}
-	
-	|	write SEMICOLON statement				{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "write";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													free($2);
-												}
-	|	conjuntoop statement			        {
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "conjuntoop";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-												}
-	|	return statement						{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $2;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "return";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-												}
-	|	writeln SEMICOLON statement				{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "writeln";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													free($2);
-												}
-	|	read SEMICOLON statement				{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "read";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													free($2);
-												}
-	|	function_call SEMICOLON statement 		{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).filhos[0] = $1;
-													(*ancora).filhos[1] = $3;
-													(*ancora).numFilhos = 2;
-													char ancora2[] = "function_call";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													free($2);
-												}
- */
-	|	%empty									{
-													no* ancora = (no*)malloc(sizeof(no));
-													(*ancora).numFilhos = 0;
-													char ancora2[] = "epsilon";
-													(*ancora).nome = strdup(ancora2);
-													(*ancora).tipo = YYSYMBOL_statement;
-													(*ancora).refereTabela = NULL;
-													(*ancora).valor = NULL;
-													$$ = ancora;
-													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = 0;
-												}
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).filhos[0] = $1;
+																(*ancora).filhos[1] = $3;
+																(*ancora).numFilhos = 2;
+																//(*(no*)$1).escopo = (*ancora).escopo;
+																//(*(no*)$3).escopo = (*ancora).escopo;
+																char ancora2[] = "variable_declaration";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																$$ = ancora;
+																$2 = NULL;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+															}
+
+	|	%empty												{
+																no* ancora = (no*)malloc(sizeof(no));
+																(*ancora).numFilhos = 0;
+																char ancora2[] = "epsilon";
+																(*ancora).nome = strdup(ancora2);
+																(*ancora).tipo = YYSYMBOL_statement;
+																(*ancora).refereTabela = NULL;
+																(*ancora).valor = NULL;
+																$$ = ancora;
+																(*ancora).conversion = None;
+																(*ancora).tipoVirtual = 0;
+															}
 	;
 	
 
@@ -966,6 +856,7 @@ single_line_statement:
 													(*ancora).tipoVirtual = 0;
 													$$ = ancora;
 													$2 = NULL;
+													errorCheck = TRUE;
 													yyerrok;
 												}
 
@@ -1061,6 +952,7 @@ comparison:
 															break;
 														case Set:
 															printf("ERRO SEMANTICO! EXPRESSAO RESULTANTE EM SET USADA EM OPERACAO INVALIDA! Linha: %d, Coluna: %d\n",linhaCount,colunaCount);
+															errorCheck = TRUE;
 															break;
 														default:
 															(*ancora).conversion = None;
@@ -1206,6 +1098,7 @@ read:
 													else{
 														printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$3,linhaCount,colunaCount);
 														(*ancora).refereTabela = NULL;
+														errorCheck = TRUE;
 													}
 													$$ = ancora;
 													(*ancora).valor = strdup($3);
@@ -1296,6 +1189,23 @@ writeln:
 													(*ancora).numFilhos = 0;
 													(*ancora).tipo = YYSYMBOL_writeln;
 													char ancora2[] = "string";
+													(*ancora).nome = strdup(ancora2);
+													(*ancora).refereTabela = NULL;
+													(*ancora).valor = strdup($3);
+													(*ancora).conversion = None;
+													(*ancora).tipoVirtual = 0;
+													$$ = ancora;
+													free($3);
+													$1 = NULL;
+													$2 = NULL;
+													$4 = NULL;
+												}
+
+	|	WRITELN OPENPAR CHAR CLOSEPAR			{
+													no* ancora = (no*)malloc(sizeof(no));
+													(*ancora).numFilhos = 0;
+													(*ancora).tipo = YYSYMBOL_writeln;
+													char ancora2[] = "char";
 													(*ancora).nome = strdup(ancora2);
 													(*ancora).refereTabela = NULL;
 													(*ancora).valor = strdup($3);
@@ -1468,6 +1378,7 @@ if:
 																												$8 = NULL;
 																												Pop(pilhaEscopo);
 																												$$ = ancora;
+																												errorCheck = TRUE;
 																												yyerrok;
 																											}
 	|  IF OPENPAR error CLOSEPAR single_line_statement else													{
@@ -1486,6 +1397,7 @@ if:
 																												$1 = NULL;
 																												$2 = NULL;
 																												$4 = NULL;
+																												errorCheck = TRUE;
 																												yyerrok;
 																											}
 	;
@@ -1700,6 +1612,7 @@ conjuntoop1:
 													}
 													else{
 														printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
+														errorCheck = TRUE;
 														(*ancora).refereTabela = NULL;
 													}
 													(*ancora).valor = strdup($1);
@@ -1888,6 +1801,7 @@ iteracao:
 																				$8 = NULL;
 																				Pop(pilhaEscopo);
 																				$$ = ancora;
+																				errorCheck = TRUE;
 																				yyerrok;
 																			}
 	|	FORALL OPENPAR error CLOSEPAR single_line_statement 				{
@@ -1905,6 +1819,7 @@ iteracao:
 																				$1 = NULL;
 																				$2 = NULL;
 																				$4 = NULL;
+																				errorCheck = TRUE;
 																				yyerrok;
 																			}
 	;
@@ -1927,14 +1842,16 @@ function_call:
 																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
 																					(*ancora).refereTabela = NULL;
 																					(*ancora).tipoVirtual = 0;
+																					errorCheck = TRUE;
 																				}
 																				int calledArgs = ContaCallArgs($3);
 																				if((*ancora).refereTabela->numArgs != calledArgs){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																					errorCheck = TRUE;
 																				}
 																				if(!VerificaTipoArgs($3,(*ancoraSimb).funcArgsTypes,0)){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA ARGUMENTOS DE TIPOS ERRADOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
-
+																					errorCheck = TRUE;
 																				}
 																				(*ancora).conversion = None;
 																				$$ = ancora;
@@ -1958,9 +1875,11 @@ function_call:
 																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
 																					(*ancora).refereTabela = NULL;
 																					(*ancora).tipoVirtual = 0;
+																					errorCheck = TRUE;
 																				}
 																				if((*ancoraSimb).numArgs != 0){
 																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																					errorCheck = TRUE;
 																				}
 																				(*ancora).conversion = None;
 																				$$ = ancora;
@@ -2030,6 +1949,7 @@ args:
 								(*ancora).conversion = None;
 								(*ancora).tipoVirtual = 0;
 								$$ = ancora;
+								errorCheck = TRUE;
 								yyerrok;
 							}
 	;
@@ -2074,7 +1994,7 @@ funcargs:
 									//simbolo *ancoraSimb = VerificarEscopo($2);
 									(*ancora).valor = strdup($2);
 									(*ancora).refereTabela = CriarSimbolo($2,atoi(((no*)$1)->valor),NULL,escopoCounter);
-									
+									(*ancora).refereTabela->ordemFuncArgs = funcArgsCounter;
 									(*ancora).conversion = None;
 									(*ancora).tipoVirtual = 0;
 									free($2);
@@ -2091,6 +2011,8 @@ funcargs:
 									//printf("\n\nOI %s OI\n\n",$2);
 									(*ancora).valor = strdup($2);
 									(*ancora).refereTabela = CriarSimbolo($2,atoi(((no*)$1)->valor),NULL,escopoCounter);
+									(*ancora).refereTabela->ordemFuncArgs = funcArgsCounter;
+									funcArgsCounter++;
 									(*ancora).conversion = None;
 									(*ancora).tipoVirtual = 0;
 									free($2);
@@ -2120,6 +2042,7 @@ funcargs:
 									(*ancora).conversion = None;
 									(*ancora).tipoVirtual = 0;
 									$$ = ancora;
+									errorCheck = TRUE;
 									yyerrok;
 								}
 	;
@@ -2130,6 +2053,7 @@ function_declaration:
 																			{ //Declaração de função é um pouco estranha, pq o escopo da função é diferente dos argumentos
 																				escopoCounter++;
 																				Push(pilhaEscopo,CriarStack(escopoCounter));
+																				funcArgsCounter = 0;
 																			}
 		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
 																				int numArgumentos;
@@ -2153,6 +2077,7 @@ function_declaration:
 																				realEscopo = Top(pilhaEscopo)->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
+																					errorCheck = TRUE;
 																				}
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,tipoRetorno);
@@ -2174,6 +2099,7 @@ function_declaration:
 																			{ //Declaração de função é um pouco estranha, pq o escopo da função é diferente dos argumentos
 																				escopoCounter++;
 																				Push(pilhaEscopo,CriarStack(escopoCounter));
+																				funcArgsCounter = 0;
 																			}
 		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
 																				int numArgumentos;
@@ -2196,6 +2122,7 @@ function_declaration:
 																				realEscopo = Top(pilhaEscopo)->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
+																					errorCheck = TRUE;
 																				}
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,Void);
@@ -2243,6 +2170,7 @@ assignment:
 																						printf("ERRO SEMANTICO! NAO HA COMO CONVERTER ESTA EXPRESSAO PARA O ID %s! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
 																						(*ancora).conversion = None;
 																						(*ancora).tipoVirtual = 0;
+																						errorCheck = TRUE;
 																					}
 																				}
 																				else{
@@ -2250,6 +2178,7 @@ assignment:
 																					(*ancora).refereTabela = NULL;
 																					(*ancora).conversion = None;
 																					(*ancora).tipoVirtual = 0;
+																					errorCheck = TRUE;
 																				}
 																				(*ancora).valor = strdup($1);
 																				free($1);
@@ -2269,6 +2198,7 @@ variable_declaration:
 																			simbolo *ancoraSimb = ProcurarTabelaEscopo($2,(Top(pilhaEscopo)->valor));
 																			if(ancoraSimb != NULL){
 																				printf("ERRO SEMANTICO! VARIAVEL %s REDECLARADA! LINHA: %d, COLUNA: %d\n",$2,linhaCount,colunaCount);
+																				errorCheck = TRUE;
 																			}
 																			else{
 																				(*ancora).refereTabela = CriarSimbolo($2,atoi(((no*)$1)->valor),NULL,escopoCounter);
@@ -2291,6 +2221,7 @@ variable_declaration:
 																			(*ancora).conversion = None;
 																			(*ancora).tipoVirtual = 0;
 																			$$ = ancora;
+																			errorCheck = TRUE;
 																			yyerrok;
 																		}
 /*		INT ID SEMICOLON
@@ -2437,6 +2368,7 @@ matharg:
 										else{
 											printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
 											(*ancora).refereTabela = NULL;
+											errorCheck = TRUE;
 										}
 										(*ancora).valor = strdup($1);
 										(*ancora).conversion = None;
@@ -2610,6 +2542,8 @@ int main(int argc, char **argv){
 	++argv;
 	--argc;//pula o nome do programa
 	escopoCounter = 0;
+	funcArgsCounter = 0;
+	errorCheck = FALSE;
 	pilhaEscopo = CriarStack(0);
 	if (argc > 0){
 		yyin = fopen(argv[0],"r");
@@ -2623,6 +2557,12 @@ int main(int argc, char **argv){
 	printf("--------------------ARVORE SINTATICA-------------------\n");
 	EscreverArvore(raiz,1);
 	//yylex_destroy();
+	if(errorCheck == TRUE){
+		printf("Houve erro na compilacao! Nao sera gerado o arquivo TAC!\n");
+	}
+	else{
+		ConverterTac();
+	}
 	ApagarTabela();
 	LimparStack(pilhaEscopo);
 	
