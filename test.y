@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "definicoes.h"
-#include "tac.c"
+#include "tac.h"
 
 extern FILE *yyin;
 extern int linhaCount;

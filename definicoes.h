@@ -10,6 +10,9 @@ enum typeVirtual{Untyped, Void, Int, Float, Elem, Set};
 #define ELEM_TABLE 7
 #define SET_TABLE 8
 
+#define TRUE 1
+#define FALSE 0
+
 typedef struct simbolo{				//elemento da tabela de simbolos. Contém ponteiros para os simbolos seguinte e anterior, o nome do simbolo, o valor associado a ele(em string,se tiver), qual tipo
 
 	struct simbolo* anterior;		//de simbolo é (vide defines acima), e o tamanho do valor(caso exista)

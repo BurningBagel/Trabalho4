@@ -3,14 +3,14 @@
 #include <string.h>
 #include "definicoes.h"
 
+#define YYSYMBOL_statement  54
+#define YYSYMBOL_write  60                
+#define YYSYMBOL_writeln  61   
+
 extern no* raiz;
 extern simbolo* tabelaSimbolos;
 
-extern int YYSYMBOL_statement;
-extern int YYSYMBOL_write;
-extern int YYSYMBOL_writeln;
-
-
+             
 
 /*
 Certo, a ideia vai ser percorrer a árvore sintática, gerando primeiro a tabela de símbolos. Nela vamos colocar todas as variáveis, e as strings.
