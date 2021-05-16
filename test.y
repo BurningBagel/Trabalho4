@@ -24,6 +24,8 @@ int errorCheck;
 
 int escopoCounter;
 int funcArgsCounter;
+int dentroDeclaraFunc;
+int textCounter;
 
 
 int VerificaTipoArgs(no* alvo, int* vector, int profund){
@@ -405,21 +407,15 @@ pilha* Top(pilha* stack){
 }
 
 void Pop(pilha* stack){
-	pilha* ancora = stack;
+	pilha* ancora = Top(stack);
 	pilha* ancora2;
-	while((*ancora).seguinte != NULL){
-		ancora = (*ancora).seguinte;
-	}
 	ancora2 = (*ancora).anterior;
 	(*ancora2).seguinte = NULL;
 	free(ancora);
 }
 
 void Push(pilha* stack, pilha* argumento){
-	pilha* ancora = stack;
-	while((*ancora).seguinte != NULL){
-		ancora = (*ancora).seguinte;
-	}
+	pilha* ancora = Top(stack);
 	(*argumento).anterior = ancora;
 	(*ancora).seguinte = argumento;
 }
@@ -750,6 +746,8 @@ single_line_statement:
 													$2 = NULL;
 													(*ancora).conversion = None;
 													(*ancora).tipoVirtual = 0;
+													
+												}
 												}
 
 	|	assignment SEMICOLON 					{
@@ -1140,6 +1138,8 @@ write:
 													(*ancora).valor = strdup($3);
 													(*ancora).conversion = None;
 													(*ancora).tipoVirtual = 0;
+													(*ancora).escopo = textCounter;
+													textCounter++;
 													$$ = ancora;
 													free($3);
 													$1 = NULL;
@@ -1156,6 +1156,8 @@ write:
 													(*ancora).valor = strdup($3);
 													(*ancora).conversion = None;
 													(*ancora).tipoVirtual = 0;
+													(*ancora).escopo = textCounter;
+													textCounter++;
 													$$ = ancora;
 													free($3);
 													$1 = NULL;
@@ -1863,7 +1865,7 @@ function_call:
 																				no* ancora = (no*)malloc(sizeof(no));
 																				(*ancora).numFilhos = 0;
 																				(*ancora).tipo = YYSYMBOL_function_call;
-																				char ancora2[] = "function_call";
+																				char ancora2[] = "no_args";
 																				(*ancora).nome = strdup(ancora2);
 																				(*ancora).valor = strdup($1);
 																				simbolo *ancoraSimb = VerificarEscopo($1);
@@ -2054,6 +2056,13 @@ function_declaration:
 																				escopoCounter++;
 																				Push(pilhaEscopo,CriarStack(escopoCounter));
 																				funcArgsCounter = 0;
+																				if(dentroDeclaraFunc){
+																					printf("ERRO SEMANTICO! DECLARACAO DE UMA FUNCAO DENTRO DE OUTRA! Linha: %d, Coluna: %d\n",linhaCount,colunaCount);
+																					errorCheck = TRUE;
+																				}
+																				else{
+																					dentroDeclaraFunc = TRUE;
+																				}
 																			}
 		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
 																				int numArgumentos;
@@ -2093,6 +2102,7 @@ function_declaration:
 																				(*ancora).conversion = None;
 																				(*ancora).tipoVirtual = 0;
 																				$$ = ancora;
+																				dentroDeclaraFunc = FALSE;
 																			}
 
 	|	VOID ID  
@@ -2100,6 +2110,13 @@ function_declaration:
 																				escopoCounter++;
 																				Push(pilhaEscopo,CriarStack(escopoCounter));
 																				funcArgsCounter = 0;
+																				if(dentroDeclaraFunc){
+																					printf("ERRO SEMANTICO! DECLARACAO DE UMA FUNCAO DENTRO DE OUTRA! Linha: %d, Coluna: %d\n",linhaCount,colunaCount);
+																					errorCheck = TRUE;
+																				}
+																				else{
+																					dentroDeclaraFunc = TRUE;
+																				}
 																			}
 		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
 																				int numArgumentos;
@@ -2138,6 +2155,7 @@ function_declaration:
 																				(*ancora).conversion = None;
 																				(*ancora).tipoVirtual = 0;
 																				$$ = ancora;
+																				dentroDeclaraFunc = FALSE;
 																			}
 	;
 	
@@ -2543,8 +2561,10 @@ int main(int argc, char **argv){
 	--argc;//pula o nome do programa
 	escopoCounter = 0;
 	funcArgsCounter = 0;
+	textCounter = 0;
 	errorCheck = FALSE;
 	pilhaEscopo = CriarStack(0);
+	dentroDeclaraFunc = FALSE;
 	if (argc > 0){
 		yyin = fopen(argv[0],"r");
 	}

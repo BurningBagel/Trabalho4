@@ -43,7 +43,8 @@ id			{letter}({letter}|{digit}|"_")*
 integer		-?{digit}+
 floating		-?{digit}+\.{digit}+
 string			\"(\\.|[^"\\])*\"
-char			'[^\r\n]'
+charguts		[^\r\n]|\\a|\\b|\\f|\\r|\\t|\\v|\\?
+char			'{charguts}'
 negacao 		!
 enderecamento 		&
 commentsingle		"//".*
@@ -57,9 +58,9 @@ linebreak		(\r\n?|\n)
 <comentario>"*/" {BEGIN(INITIAL);}
 <comentario>[^*\n]+
 <comentario>"*"
-<comentario>"\n" {linhaCount++;colunaCount = 0;}
+<comentario>"\n" {linhaCount++;colunaCount = 1;}
 		
-{linebreak}		{linhaCount++;colunaCount = 0;}
+{linebreak}		{linhaCount++;colunaCount = 1;}
 {commentsingle}	{}
 {ws}		{colunaCount += yyleng;}
 int		{printf("Achei um int na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng; return INT;}
