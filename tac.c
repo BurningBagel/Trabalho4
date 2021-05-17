@@ -21,8 +21,8 @@ Para evitar conflito de nomes, todos os nomes gerados começam com '_'
 */
 
 int TACMathop(no* alvo, FILE* arq);
-
-
+int TACComparison(no* alvo, FILE* arq);
+void TACStatement(no* alvo, FILE* arq);
 
 void DecideConversaoTAC(FILE* arq, no* alvo, int arg1, int arg2){
 	int value = (*alvo).conversion;
@@ -73,7 +73,7 @@ void TACStackArgs(no* alvo, FILE* arq){
 
 	fprintf(arq,"push $%d\n",arg);
 
-	if(!strcmp(ancorafilho,"comma")){
+	if(!strcmp(ancoraFilho,"comma")){
 		TACStackArgs((*alvo).filhos[1]->filhos[1],arq);
 	}
 }
@@ -87,7 +87,7 @@ void TACFunctionCall(no* alvo, FILE* arq){//Função espera que você vá dar po
 	if(!strcmp(ancora,"function_call")){
 		TACStackArgs((*alvo).filhos[0],arq);
 	}
-	fprintf("call %s%d\n",valor,escopoAlvo);
+	fprintf(arq,"call %s%d\n",(*alvo).valor,escopoAlvo);
 }
 
 
@@ -137,7 +137,7 @@ int TACMathop1(no* alvo, FILE* arq){
 	else{
 		contadorGeral++;
 		final = contadorGeral;
-		arg1 = TACMatho1((*alvo).filhos[0],arq);
+		arg1 = TACMathop1((*alvo).filhos[0],arq);
 		arg2 = TACMathop2((*alvo).filhos[1],arq);
 		DecideConversaoTAC(arq,alvo,arg1,arg2);
 		if(!strcmp(ancora,"ast")){
@@ -250,11 +250,11 @@ void TACReturn(no* alvo, FILE* arq){
 	int final;
 	contadorGeral++;
 	if(!strcmp(ancora,"comparison")){
-		TACComparison(ancora.filhos[0],arq);
+		TACComparison((*alvo).filhos[0],arq);
 		fprintf(arq,"return $%d\n",contadorGeral);
 	}
 	else if(!strcmp(ancora,"mathop")){
-		final = TACMathop(ancora.filhos[0],arq);
+		final = TACMathop((*alvo).filhos[0],arq);
 		fprintf(arq,"return $%d\n",final);
 	}
 	else{
@@ -284,7 +284,7 @@ void TACWrite(no* alvo, FILE* arq){
 		sprintf(item2, "%d", (*alvo).escopo);
 		strcat(item,item2);
 
-		fprintf(arq,"mov $%d, %d\n",contadorGeral,strlen((*alvo).valor));
+		fprintf(arq,"mov $%d, %d\n",contadorGeral,(int)strlen((*alvo).valor));
 		fprintf(arq,"mov $%d, 0\n",contadorGeral+1);
 		fprintf(arq, "_L%d\n",jumpCounter);
 		jumpCounter++;
@@ -377,11 +377,11 @@ TBM NÃO FUNCIONA pq eu já escrevi no maldito arquivo FOCK DE NOVO
 
 void TACFunctionDeclaration(no* alvo, FILE* arq){
 	char* ancora = (*alvo).valor;
-	if(!strcmp(valor,"main")){
+	if(!strcmp(ancora,"main")){
 		fprintf(arq,"_main:\n");
 	}
 	else{
-		fprintf(arq,"%s:\n",ancora,);
+		fprintf(arq,"%s:\n",ancora);
 	}
 }
 
@@ -391,6 +391,7 @@ void TACFor(no* alvo, FILE* arq){
 	int forStart = jumpCounter;
 	int ancora;
 	int forEnd;
+	int comp;
 
 	TACAssignment((*alvo).filhos[0],arq);
 	fprintf(arq,"_L%d:\n",forStart);
@@ -415,19 +416,19 @@ void TACStatement(no* alvo, FILE* arq){
 	no* atual = alvo;
 
 	if(!strcmp((*atual).nome,"single_line_statement")){
-			TACSingleLine((*atual).filhos[0],saida);
+			TACSingleLine((*atual).filhos[0],arq);
 			TACStatement((*atual).filhos[1],arq);
 		}
 		else if(!strcmp((*atual).nome,"function_declaration")){
-			TACFunctionDeclaration((*atual).filhos[0],saida);
+			TACFunctionDeclaration((*atual).filhos[0],arq);
 			TACStatement((*atual).filhos[1],arq);
 		}
 		else if(!strcmp((*atual).nome,"for")){
-			TACFor((*atual).filhos[0],saida);
+			TACFor((*atual).filhos[0],arq);
 			TACStatement((*atual).filhos[1],arq);
 		}
 		else if(!strcmp((*atual).nome,"if")){
-			TACIf((*atual).filhos[0],saida);
+			TACIf((*atual).filhos[0],arq);
 			TACStatement((*atual).filhos[1],arq);
 		}
 		else if(!strcmp((*atual).nome,"variable_declaration")){
