@@ -2957,15 +2957,15 @@ void EscreverArvore(no* argumento,int profund){
 		default:
 		break;
 		}
-	
-
-
-
-	
-	ApagarNo(argumento);
 }
 
-
+void ApagarArvore(no* alvo){
+	int i;
+	for(i = 0;i < (*alvo).numFilhos; i++){
+		ApagarArvore((*alvo).filhos[i]);
+	}
+	ApagarNo(alvo);
+}
 
 
 int main(int argc, char **argv){
@@ -3000,6 +3000,7 @@ int main(int argc, char **argv){
 	}
 	ApagarTabela();
 	LimparStack(pilhaEscopo);
+	ApagarArvore(raiz);
 	
 	yylex_destroy();
 	return 0;
