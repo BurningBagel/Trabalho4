@@ -73,9 +73,12 @@ int ContaCallArgs(no* alvo){
 }
 
 int ContaFuncArgs(no* alvo){
-	if(!strcmp((*alvo).nome,"epsilon")) return 0;
-	else if (!strcmp((*alvo).nome,"single")) return 1;
-	else return 1 + ContaFuncArgs((*alvo).filhos[1]);
+	if(!strcmp((*alvo).nome,"single")){
+		return 1;
+	} 
+	else if (!strcmp((*alvo).nome,"comma")){
+		return 1 + ContaFuncArgs((*alvo).filhos[1]);
+	} 
 	return 0;
 }
 
@@ -325,13 +328,14 @@ void ApagarNo(no* argumento){
 	free(argumento);
 }
 
-void EscreverArvore(no* argumento,int profund){
-	int i,j;
-	if(argumento == NULL) return;
+void PrintLines(int profund){
+	int j;
 	for(j = 0;j < profund;j++){
 		printf("-");
-	}
-	printf(">%s",(*argumento).nome);
+	}	
+}
+
+void EscreveConversao(no* argumento){
 	if((*argumento).conversion != None){
 		switch((*argumento).conversion){
 			case IntToFloatLeft:
@@ -372,10 +376,422 @@ void EscreverArvore(no* argumento,int profund){
 			break;
 		}
 	}
-	printf("\n");
-	for(i = 0;i < (*argumento).numFilhos;i++){
-		EscreverArvore((*argumento).filhos[i],profund+1);
+}
+
+void EscreverArvore(no* argumento,int profund){
+	int i,j,offset;
+	char* ancora;
+	char* ancoraValor;
+
+	if(argumento == NULL) return;
+	if((*argumento).tipo == YYSYMBOL_single_line_statement||
+		(*argumento).tipo == YYSYMBOL_conjuntoop){
+			for(i = 0;i < (*argumento).numFilhos;i++){
+			EscreverArvore((*argumento).filhos[i],profund);
+			}
+			return;
 	}
+
+	ancora = (*argumento).nome;
+	ancoraValor = (*argumento).valor;
+
+	switch((*argumento).tipo){
+		case YYSYMBOL_statement:
+			if(!strcmp(ancora,"curly")){
+				PrintLines(profund);
+				printf(">{\n");
+				for(i = 0;i < (*argumento).numFilhos;i++){
+					EscreverArvore((*argumento).filhos[i],profund+1);
+				}
+				PrintLines(profund);
+				printf(">}\n");
+			}
+			else if(!strcmp(ancora,"variable_declaration")){
+				EscreverArvore((*argumento).filhos[i],profund);
+				PrintLines(profund);
+				printf(">;\n");
+			}
+			else{
+				for(i = 0;i < (*argumento).numFilhos;i++){
+					EscreverArvore((*argumento).filhos[i],profund);
+				}
+			}
+		break;
+
+		case YYSYMBOL_single_line_statement:
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">;\n");
+		break;
+
+		case YYSYMBOL_comparg:
+			if(!strcmp(ancora,"comparison")){
+				PrintLines(profund);
+				printf(">(\n");
+				EscreverArvore((*argumento).filhos[0],profund+1);
+				PrintLines(profund);
+				printf(">)\n");
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+		break;
+
+		case YYSYMBOL_comparison:
+			if(!strcmp(ancora,"not")){
+				PrintLines(profund);
+				printf(">not\n");
+				EscreverArvore((*argumento).filhos[0],profund+1);
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund+1);
+				PrintLines(profund);
+				printf(">%s\n",ancora);
+				EscreverArvore((*argumento).filhos[0],profund+1);
+			}
+		break;
+
+		case YYSYMBOL_read:
+			PrintLines(profund);
+			printf(">read\n");
+			PrintLines(profund);
+			printf(">(\n");
+			PrintLines(profund);
+			printf(">%s\n",ancora);
+			PrintLines(profund);
+			printf(">)\n");
+		break;
+
+		case YYSYMBOL_write:
+			if(!strcmp(ancora,"mathop")){
+				PrintLines(profund);
+				printf(">write\n");
+				PrintLines(profund);
+				printf(">(\n");
+				EscreverArvore((*argumento).filhos[0],profund);
+				PrintLines(profund);
+				printf(">)\n");
+			}
+			else{
+				PrintLines(profund);
+				printf(">write\n");
+				PrintLines(profund);
+				printf(">(\n");
+				PrintLines(profund);
+				printf(">%s\n",ancora);
+				PrintLines(profund);
+				printf(">)\n");
+			}
+		break;
+
+		case YYSYMBOL_writeln:
+			if(!strcmp(ancora,"mathop")){
+				PrintLines(profund);
+				printf(">write\n");
+				PrintLines(profund);
+				printf(">(\n");
+				EscreverArvore((*argumento).filhos[0],profund);
+				PrintLines(profund);
+				printf(">)\n");
+			}
+			else{
+				PrintLines(profund);
+				printf(">write\n");
+				PrintLines(profund);
+				printf(">(\n");
+				PrintLines(profund);
+				printf(">%s\n",ancora);
+				PrintLines(profund);
+				printf(">)\n");
+			}
+		break;
+
+		case YYSYMBOL_return:
+			PrintLines(profund);
+			printf(">return\n");
+			if(strcmp(ancora,"null")){
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+		break;
+
+		case YYSYMBOL_for:
+			PrintLines(profund);
+			printf(">for\n");
+			PrintLines(profund);
+			printf(">(\n");
+			for(i = 0; i < 3; i++){
+				EscreverArvore((*argumento).filhos[i],profund);
+				PrintLines(profund);
+				if(i != 2) printf(">;\n");
+			}
+			PrintLines(profund);
+			printf(">)\n");
+			PrintLines(profund);
+			printf(">{\n");
+			EscreverArvore((*argumento).filhos[3],profund);
+			PrintLines(profund);
+			printf(">}\n");
+		break;
+
+		case YYSYMBOL_if:
+			PrintLines(profund);
+			printf(">if\n");
+			PrintLines(profund);
+			printf(">(\n");
+
+			EscreverArvore((*argumento).filhos[0],profund);
+
+			PrintLines(profund);
+			printf(">)\n");
+			PrintLines(profund);
+			printf(">{\n");
+
+			EscreverArvore((*argumento).filhos[1],profund+1);
+
+			PrintLines(profund);
+			printf(">}\n");
+
+			EscreverArvore((*argumento).filhos[2],profund);
+
+		break;	
+
+		case YYSYMBOL_else:
+			if(!strcmp(ancora,"epsilon")){
+				return;
+			}
+			PrintLines(profund);
+			printf(">else\n");
+
+			if(!strcmp(ancora,"curly")){
+				PrintLines(profund);
+				printf(">{\n");
+
+				EscreverArvore((*argumento).filhos[0],profund+1);
+
+				PrintLines(profund);
+				printf(">}\n");
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund+1);
+			}
+		break;
+
+		case YYSYMBOL_conjuntoop:
+			EscreverArvore((*argumento).filhos[0],profund);
+		break;
+		case YYSYMBOL_conjuntoop1:
+			if(!strcmp(ancora,"ID")){
+				PrintLines(profund);
+				printf(">%s\n",ancoraValor);
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+		break;
+		case YYSYMBOL_pertinencia:
+			EscreverArvore((*argumento).filhos[0],profund+1);
+			PrintLines(profund);
+			printf(">in\n");
+			EscreverArvore((*argumento).filhos[1],profund+1);
+		break;
+		case YYSYMBOL_tipagem:
+			PrintLines(profund);
+			printf(">is_set\n");
+			PrintLines(profund);
+			printf(">(\n");
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">)\n");
+		break;
+		case YYSYMBOL_inclusao:
+			PrintLines(profund);
+			printf(">add\n");
+			PrintLines(profund);
+			printf(">(\n");
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">)\n");
+		break;
+		case YYSYMBOL_remocao:
+			PrintLines(profund);
+			printf(">remove\n");
+			PrintLines(profund);
+			printf(">(\n");
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">)\n");
+		break;
+		case YYSYMBOL_selecao:
+			PrintLines(profund);
+			printf(">exists\n");
+			PrintLines(profund);
+			printf(">(\n");
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">)\n");
+		break;
+		case YYSYMBOL_iteracao:
+			PrintLines(profund);
+			printf(">forall\n");
+			PrintLines(profund);
+			printf(">(\n");
+
+			EscreverArvore((*argumento).filhos[0],profund+1);
+
+			PrintLines(profund);
+			printf(">)\n");
+			if(!strcmp(ancora,"bracket")){
+				PrintLines(profund);
+				printf(">{\n");
+
+				EscreverArvore((*argumento).filhos[1],profund+1);
+
+				PrintLines(profund);
+				printf(">}\n");
+			}
+			else{
+				EscreverArvore((*argumento).filhos[1],profund+1);
+			}
+		break;
+		case YYSYMBOL_function_call:
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+			PrintLines(profund);
+			printf(">(\n");
+			if(!strcmp(ancora,"function_call")){
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+			PrintLines(profund);
+			printf(">)\n");
+		break;
+		case YYSYMBOL_args:
+			EscreverArvore((*argumento).filhos[0],profund);
+			EscreverArvore((*argumento).filhos[1],profund);
+		break;
+		case YYSYMBOL_args1:
+			if(!strcmp(ancora,"comma")){
+				PrintLines(profund);
+				printf(">,\n");
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+		break;
+		case YYSYMBOL_funcargs:
+			if(!strcmp(ancora,"epsilon")){
+				return;
+			}
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+			if(!strcmp(ancora,"comma")){
+				PrintLines(profund);
+				printf(">,\n");
+				EscreverArvore((*argumento).filhos[1],profund);
+			}
+		break;
+		case YYSYMBOL_function_declaration:
+			i = 0;
+			if(!strcmp(ancora,"type")){
+				EscreverArvore((*argumento).filhos[i],profund);
+				i++;
+			}
+			else{
+				PrintLines(profund);
+				printf(">void\n");
+			}
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+			PrintLines(profund);
+			printf(">(\n");
+			EscreverArvore((*argumento).filhos[i],profund+1);
+			i++;
+			PrintLines(profund);
+			printf(">)\n");
+			PrintLines(profund);
+			printf(">{\n");
+			EscreverArvore((*argumento).filhos[i],profund+1);
+			i++;
+			PrintLines(profund);
+			printf(">}\n");
+		break;
+		case YYSYMBOL_assignment:
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+			PrintLines(profund);
+			printf(">=");
+			EscreveConversao(argumento);
+			printf("\n");
+			EscreverArvore((*argumento).filhos[0],profund);
+		break;
+		case YYSYMBOL_variable_declaration:
+			EscreverArvore((*argumento).filhos[0],profund);
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+		break;
+		case YYSYMBOL_mathop:
+			if(!strcmp(ancora,"mathop1")){
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund+1);
+				PrintLines(profund);
+				printf(">%s",ancora);
+				EscreveConversao(argumento);
+				printf("\n");
+				EscreverArvore((*argumento).filhos[1],profund+1);
+			}
+		break;
+		case YYSYMBOL_mathop1:
+			if(!strcmp(ancora,"mathop2")){
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund+1);
+				PrintLines(profund);
+				printf(">%s",ancora);
+				EscreveConversao(argumento);
+				printf("\n");
+				EscreverArvore((*argumento).filhos[1],profund+1);
+			}
+		break;
+		case YYSYMBOL_mathop2:
+			if(!strcmp(ancora,"pars")){
+				PrintLines(profund);
+				printf(">(\n");
+				EscreverArvore((*argumento).filhos[0],profund);
+				PrintLines(profund);
+				printf(">)\n");
+			}
+			else{
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+		break;
+		case YYSYMBOL_matharg:
+			if(!strcmp(ancora,"function_call") || !strcmp(ancora,"num")){
+				EscreverArvore((*argumento).filhos[0],profund);
+			}
+			else{
+				PrintLines(profund);
+				printf(">%s\n",ancoraValor);
+			}
+		break;
+		case YYSYMBOL_type:
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+		break;
+		case YYSYMBOL_num:
+			PrintLines(profund);
+			printf(">%s\n",ancoraValor);
+		break;
+
+
+
+		default:
+		break;
+		}
+	
+
+
+
 	
 	ApagarNo(argumento);
 }
@@ -748,7 +1164,7 @@ single_line_statement:
 													(*ancora).tipoVirtual = 0;
 													
 												}
-												}
+												
 
 	|	assignment SEMICOLON 					{
 													no* ancora = (no*)malloc(sizeof(no));
@@ -1768,7 +2184,7 @@ iteracao:
 																				(*ancora).filhos[0] = $3;
 																				(*ancora).filhos[1] = $5;
 																				(*ancora).tipo = YYSYMBOL_iteracao;
-																				char ancora2[] = "semicolon";
+																				char ancora2[] = "single";
 																				(*ancora).nome = strdup(ancora2);
 																				(*ancora).refereTabela = NULL;
 																				(*ancora).valor = NULL;
