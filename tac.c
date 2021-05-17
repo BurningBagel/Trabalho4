@@ -67,7 +67,7 @@ void PercorrerArvoreString(FILE *arq, no* alvo){
 }
 
 void TACStackArgs(no* alvo, FILE* arq){
-	char* ancora = (*alvo).nome;
+	//char* ancora = (*alvo).nome;
 	char* ancoraFilho = (*alvo).filhos[1]->nome;
 	int arg = TACMathop((*alvo).filhos[0],arq);
 
@@ -94,7 +94,6 @@ void TACFunctionCall(no* alvo, FILE* arq){//Função espera que você vá dar po
 int TACMathop2(no* alvo, FILE* arq){
 	char* ancora = (*alvo).nome;
 	int final;
-	int arg1,arg2;
 	no* filho;
 
 
@@ -182,7 +181,6 @@ int TACMathop(no* alvo, FILE* arq){
 int TACComparg(no* alvo, FILE* arq){
 	contadorGeral++;
 	int final = contadorGeral;
-	int discard;
 	char* ancora = (*alvo).nome;
 
 	if(!strcmp(ancora,"comparison")){
@@ -192,7 +190,7 @@ int TACComparg(no* alvo, FILE* arq){
 		TACComparison((*alvo).filhos[0],arq);
 	}	
 	else{
-		discard = TACMathop((*alvo).filhos[0],arq);
+		(void)TACMathop((*alvo).filhos[0],arq);
 	}
 	
 	return final;
@@ -264,7 +262,6 @@ void TACReturn(no* alvo, FILE* arq){
 
 void TACWrite(no* alvo, FILE* arq){
 	char* item;
-	char* item2;
 	int final;
 	char* ancora = (*alvo).nome;
 	contadorGeral++;
@@ -281,14 +278,12 @@ void TACWrite(no* alvo, FILE* arq){
 			item = "_char";
 		}
 
-		sprintf(item2, "%d", (*alvo).escopo);
-		strcat(item,item2);
 
 		fprintf(arq,"mov $%d, %d\n",contadorGeral,(int)strlen((*alvo).valor));
 		fprintf(arq,"mov $%d, 0\n",contadorGeral+1);
 		fprintf(arq, "_L%d\n",jumpCounter);
 		jumpCounter++;
-		fprintf(arq,"mov $%d, &%s\n",contadorGeral+2,item);
+		fprintf(arq,"mov $%d, &%s%d\n",contadorGeral+2,item,(*alvo).escopo);
 		fprintf(arq,"mov $%d, [$%d]\n",contadorGeral+2,contadorGeral+1);
 		fprintf(arq,"print $%d\n",contadorGeral+2);
 		fprintf(arq, "add $%d, $%d, 1\n",contadorGeral+1,contadorGeral+1);
@@ -389,7 +384,6 @@ void TACFunctionDeclaration(no* alvo, FILE* arq){
 
 void TACFor(no* alvo, FILE* arq){
 	int forStart = jumpCounter;
-	int ancora;
 	int forEnd;
 	int comp;
 

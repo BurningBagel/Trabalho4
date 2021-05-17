@@ -2554,18 +2554,12 @@ void yyerror(char const *s){
 */
 
 void EscreverArvore(no* argumento,int profund){
-	int i,j,offset;
+	int i;
 	char* ancora;
 	char* ancoraValor;
 
 	if(argumento == NULL) return;
-	if((*argumento).tipo == YYSYMBOL_single_line_statement||
-		(*argumento).tipo == YYSYMBOL_conjuntoop){
-			for(i = 0;i < (*argumento).numFilhos;i++){
-			EscreverArvore((*argumento).filhos[i],profund);
-			}
-			return;
-	}
+	
 
 	ancora = (*argumento).nome;
 	ancoraValor = (*argumento).valor;
@@ -2575,21 +2569,21 @@ void EscreverArvore(no* argumento,int profund){
 			if(!strcmp(ancora,"curly")){
 				PrintLines(profund);
 				printf(">{\n");
-				for(i = 0;i < (*argumento).numFilhos;i++){
-					EscreverArvore((*argumento).filhos[i],profund+1);
-				}
+				EscreverArvore((*argumento).filhos[0],profund+1);
 				PrintLines(profund);
 				printf(">}\n");
 			}
 			else if(!strcmp(ancora,"variable_declaration")){
-				EscreverArvore((*argumento).filhos[i],profund);
+				EscreverArvore((*argumento).filhos[0],profund);
 				PrintLines(profund);
 				printf(">;\n");
 			}
+			else if(strcmp(ancora,"empty")){
+				EscreverArvore((*argumento).filhos[0],profund);
+				EscreverArvore((*argumento).filhos[1],profund);
+			}
 			else{
-				for(i = 0;i < (*argumento).numFilhos;i++){
-					EscreverArvore((*argumento).filhos[i],profund);
-				}
+				return;
 			}
 		break;
 
@@ -3002,7 +2996,7 @@ int main(int argc, char **argv){
 		printf("Houve erro na compilacao! Nao sera gerado o arquivo TAC!\n");
 	}
 	else{
-		ConverterTac();
+		//ConverterTac();
 	}
 	ApagarTabela();
 	LimparStack(pilhaEscopo);
