@@ -10,7 +10,7 @@
 extern no* raiz;
 extern simbolo* tabelaSimbolos;
 
-int generalCounter;//Contador para podermos gerar simbolos únicos sempre que necessário
+int contadorGeral;//Contador para podermos gerar simbolos únicos sempre que necessário
 int jumpCounter;             
 
 /*
@@ -19,6 +19,10 @@ Para evitar conflito de nomes, todos os nomes gerados começam com '_'
 
 
 */
+
+int TACMathop(no* alvo, FILE* arq);
+
+
 
 void DecideConversaoTAC(FILE* arq, no* alvo, int arg1, int arg2){
 	int value = (*alvo).conversion;
@@ -67,7 +71,7 @@ void TACStackArgs(no* alvo, FILE* arq){
 	char* ancoraFilho = (*alvo).filhos[1]->nome;
 	int arg = TACMathop((*alvo).filhos[0],arq);
 
-	fprintf("push $%d\n",arg);
+	fprintf(arq,"push $%d\n",arg);
 
 	if(!strcmp(ancorafilho,"comma")){
 		TACStackArgs((*alvo).filhos[1]->filhos[1],arq);
@@ -87,8 +91,6 @@ void TACFunctionCall(no* alvo, FILE* arq){//Função espera que você vá dar po
 }
 
 
-int TACMathop(no* alvo, FILE* arq);
-
 int TACMathop2(no* alvo, FILE* arq){
 	char* ancora = (*alvo).nome;
 	int final;
@@ -107,12 +109,12 @@ int TACMathop2(no* alvo, FILE* arq){
 		ancora = (*filho).nome;//<----- ANCORA AGORA É O NOME DO FILHO!
 
 		if(!strcmp(ancora,"ID")){
-			fprintf(arq,"mov $%d, %s\n",final,(*filho).valor);
+			fprintf(arq,"mov $%d, %s%d\n",final,(*filho).valor,(*filho).refereTabela->escopo);
 		}
 		else{
 			filho = (*filho).filhos[0];
 			if(!strcmp(ancora,"num")){
-				fprintf(arq,"add $%d, %s, 0\n",final,(*filho).valor);
+				fprintf(arq,"add $%d, %s%d, 0\n",final,(*filho).valor,(*filho).refereTabela->escopo);
 			}
 			else{
 				TACFunctionCall(filho,arq);
@@ -135,8 +137,8 @@ int TACMathop1(no* alvo, FILE* arq){
 	else{
 		contadorGeral++;
 		final = contadorGeral;
-		arg1 = TACMatho1((*alvo).filhos[0]);
-		arg2 = TACMathop2((*alvo).filhos[1]);
+		arg1 = TACMatho1((*alvo).filhos[0],arq);
+		arg2 = TACMathop2((*alvo).filhos[1],arq);
 		DecideConversaoTAC(arq,alvo,arg1,arg2);
 		if(!strcmp(ancora,"ast")){
 			fprintf(arq,"mul $%d, $%d, $%d\n",final,arg1,arg2);
@@ -161,8 +163,8 @@ int TACMathop(no* alvo, FILE* arq){
 	else{
 		contadorGeral++;
 		final = contadorGeral;
-		arg1 = TACMathop((*alvo).filhos[0]);
-		arg2 = TACMathop1((*alvo).filhos[1]);
+		arg1 = TACMathop((*alvo).filhos[0],arq);
+		arg2 = TACMathop1((*alvo).filhos[1],arq);
 		DecideConversaoTAC(arq,alvo,arg1,arg2);
 		if(!strcmp(ancora,"plus")){
 			fprintf(arq,"add $%d, $%d, $%d\n",final,arg1,arg2);
@@ -203,13 +205,13 @@ int TACComparison(no* alvo, FILE* arq){//Aqui apareceu um problema. Precisamos q
 	int final = contadorGeral;
 	int arg1,arg2;
 	if(!strcmp(ancora,"not")){
-		arg1 = TACComparg(ancora.filhos[0],arq);
+		arg1 = TACComparg((*alvo).filhos[0],arq);
 		DecideConversaoTAC(arq,alvo,final,0);
 		fprintf(arq, "not $%d, $%d\n",final,final);
 	}
 	else {
-		arg1 = TACComparg(ancora.filhos[0],arq);
-		arg2 = TACComparg(ancora.filhos[1],arq);
+		arg1 = TACComparg((*alvo).filhos[0],arq);
+		arg2 = TACComparg((*alvo).filhos[1],arq);
 
 		DecideConversaoTAC(arq,alvo,arg1,arg2);
 
@@ -265,7 +267,7 @@ void TACWrite(no* alvo, FILE* arq){
 	char* item2;
 	int final;
 	char* ancora = (*alvo).nome;
-	generalCounter++;
+	contadorGeral++;
 
 	if(!strcmp(ancora,"mathop")){
 		final = TACMathop((*alvo).filhos[0],arq);
@@ -282,19 +284,19 @@ void TACWrite(no* alvo, FILE* arq){
 		sprintf(item2, "%d", (*alvo).escopo);
 		strcat(item,item2);
 
-		fprintf(arq,"mov $%d, %d\n",generalCounter,strlen((*alvo).valor));
-		fprintf(arq,"mov $%d, 0\n",generalCounter+1);
+		fprintf(arq,"mov $%d, %d\n",contadorGeral,strlen((*alvo).valor));
+		fprintf(arq,"mov $%d, 0\n",contadorGeral+1);
 		fprintf(arq, "_L%d\n",jumpCounter);
 		jumpCounter++;
-		fprintf(arq,"mov $%d, &%s\n",generalCounter+2,item);
-		fprintf(arq,"mov $%d, [$%d]\n",generalCounter+2,generalCounter+1);
-		fprintf(arq,"print $%d\n",generalCounter+2);
-		fprintf(arq, "add $%d, $%d, 1\n",generalCounter+1,generalCounter+1);
-		fprintf(arq,"sub $%d, $%d, $%d\n",generalCounter+3,generalCounter,generalCounter+1)
+		fprintf(arq,"mov $%d, &%s\n",contadorGeral+2,item);
+		fprintf(arq,"mov $%d, [$%d]\n",contadorGeral+2,contadorGeral+1);
+		fprintf(arq,"print $%d\n",contadorGeral+2);
+		fprintf(arq, "add $%d, $%d, 1\n",contadorGeral+1,contadorGeral+1);
+		fprintf(arq,"sub $%d, $%d, $%d\n",contadorGeral+3,contadorGeral,contadorGeral+1);
 		fprintf(arq, "brnz _L%d\n", jumpCounter-1);
 	}
 
-	generalCounter--;	
+	contadorGeral--;	
 }
 
 void TACWriteLn(no* alvo, FILE* arq){
@@ -308,7 +310,7 @@ void TACAssignment(no* alvo, FILE* arq){
 	contadorGeral++;
 	int result = TACMathop((*alvo).filhos[0],arq);
 	DecideConversaoTAC(arq,alvo,result,0);
-	fprintf(arq,"mov %s, $%d\n",valor,result);
+	fprintf(arq,"mov %s%d, $%d\n",(*alvo).valor,(*alvo).refereTabela->escopo,result);
 	contadorGeral--;
 }
 
@@ -379,7 +381,7 @@ void TACFunctionDeclaration(no* alvo, FILE* arq){
 		fprintf(arq,"_main:\n");
 	}
 	else{
-		fprintf(arq,"%s:\n",ancora);
+		fprintf(arq,"%s:\n",ancora,);
 	}
 }
 
@@ -484,7 +486,7 @@ void ConverterTac(){
 	Devido a necessidades do TAC, elas tem que estar na tabela :/
 	*/
 
-	generalCounter = 0;
+	contadorGeral = 0;
 	jumpCounter = 0;
 	PercorrerArvoreString(saida,raiz);
 	fprintf(saida,"char _endl = '\n'\n");
@@ -553,13 +555,13 @@ void ConverterTac(){
 
 					"mov $0, %d\n", strlen(valor).
 					"mov $1,0\n"
-					"_L%d:\n",generalCounter; generalCounter++;
+					"_L%d:\n",contadorGeral; contadorGeral++;
 					"mov $2, &%s\n," Aqui temos que colocar o nome do ID, ou o nome na .table desta string(("_string" ou "_char") + escopo).
 					"mov $2,[$1]\n"
 					"print $2\n"
 					"add $1, $1, 1\n"
 					"sub $3, $0, $1\n"
-					"brnz _L%d\n",generalCounter - 1;
+					"brnz _L%d\n",contadorGeral - 1;
 
 					SE FOR WRITELN, ADICIONE
 
