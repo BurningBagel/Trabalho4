@@ -252,6 +252,7 @@ simbolo* RemoverSimbolo(simbolo* alvo){//retorna ponteiro para o próximo simbol
 	simbolo *ancora = (*alvo).seguinte;
 	free((*alvo).nome);
 	free((*alvo).valor);
+	if((*alvo).numArgs > 0) free((*alvo)funcArgsTypes);
 	free(alvo);
 	return ancora;
 }
