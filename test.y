@@ -717,14 +717,16 @@ statement:
 	|	%empty												{
 																no* ancora = (no*)malloc(sizeof(no));
 																(*ancora).numFilhos = 0;
+																(*ancora).filhos = NULL;
 																char ancora2[] = "epsilon";
 																(*ancora).nome = strdup(ancora2);
 																(*ancora).tipo = YYSYMBOL_statement;
 																(*ancora).refereTabela = NULL;
 																(*ancora).valor = NULL;
-																$$ = ancora;
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
+																(*ancora).escopo = 0;
+																$$ = ancora;
 															}
 	;
 	
