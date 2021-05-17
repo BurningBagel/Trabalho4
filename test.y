@@ -2554,9 +2554,9 @@ void yyerror(char const *s){
 */
 
 void EscreverArvore(no* argumento,int profund){
-	int i;
-	char* ancora;
-	char* ancoraValor;
+	int i = 0;
+	char* ancora = NULL;
+	char* ancoraValor = NULL;
 
 	if(argumento == NULL) return;
 	
