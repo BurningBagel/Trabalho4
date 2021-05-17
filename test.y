@@ -2945,7 +2945,7 @@ void EscreverArvore(no* argumento,int profund){
 		break;
 		case YYSYMBOL_type:
 			PrintLines(profund);
-			printf(">%s\n",ancoraValor);
+			printf(">%s\n",ancora);
 		break;
 		case YYSYMBOL_num:
 			PrintLines(profund);

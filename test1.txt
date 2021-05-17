@@ -12,7 +12,7 @@ float func3(int c){
 }
 
 
-float func4(int d){
+float main(int d){
 	return (d+(2 * 3 - (d + 4)));
 }
 
