@@ -412,6 +412,13 @@ void TACFor(no* alvo, FILE* arq){
 	fprintf(arq,"_L%d:\n",forEnd);
 }
 
+void TACIf(no* alvo, FILE* arq){
+	return;
+}
+
+
+
+
 void TACStatement(no* alvo, FILE* arq){
 	no* atual = alvo;
 
