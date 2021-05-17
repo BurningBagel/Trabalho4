@@ -2579,7 +2579,7 @@ void EscreverArvore(no* argumento,int profund){
 				PrintLines(profund);
 				printf(">;\n");
 			}
-			else if(strcmp(ancora,"empty")){
+			else if(strcmp(ancora,"epsilon")){
 				EscreverArvore((*argumento).filhos[0],profund);
 				EscreverArvore((*argumento).filhos[1],profund);
 			}
