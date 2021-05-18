@@ -3010,7 +3010,7 @@ int main(int argc, char **argv){
 		printf("Houve erro na compilacao! Nao sera gerado o arquivo TAC!\n");
 	}
 	else{
-		//ConverterTac();
+		ConverterTac();
 	}
 	ApagarTabela();
 	LimparStack(pilhaEscopo);
