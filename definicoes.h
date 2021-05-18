@@ -19,6 +19,7 @@ typedef struct simbolo{				//elemento da tabela de simbolos. Contém ponteiros p
 	struct simbolo* seguinte;
 	char *nome;
 	char *valor;
+	char **funcArgs;
 	int ordemFuncArgs;
 	int tipo;
 	int tamanhoValor;

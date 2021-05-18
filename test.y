@@ -45,16 +45,17 @@ int VerificaTipoArgs(no* alvo, int* vector, int profund){
 }
 
 
-void PreencheFuncArgs(no* alvo, int num, int* vector){
-	if(num == 0) return;
-	else if (!strcmp((*alvo).nome,"single")){
-		vector[num] = (*alvo).filhos[0]->tipoVirtual;
-		return;
-	}
+void PreencheFuncArgs(no* alvo, int num, int* vector, char** names){
+	if(!strcmp((*alvo).nome,"epsilon")) return;
 	else{
+		names[vector] = strdup((*alvo).valor);
 		vector[num] = (*alvo).filhos[0]->tipoVirtual;
-		PreencheFuncArgs((*alvo).filhos[1],num + 1,vector);
-	}
+		if (strcmp((*alvo).nome,"single")){
+			PreencheFuncArgs((*alvo).filhos[1],num + 1,vector,names);
+		}
+	
+	} 
+	
 }
 
 int ContaCallArgs(no* alvo){
@@ -63,7 +64,7 @@ int ContaCallArgs(no* alvo){
 	}
 	else{
 		if(!strcmp((*alvo).nome,"comma")){
-			return ContaCallArgs((*alvo).filhos[1]);
+			return ContaCallArgs((*alvo).filhos[0]);
 		}
 		else{
 			return 0;
@@ -249,10 +250,17 @@ simbolo* CriarSimboloFuncao(char* nome, int tipo, char* valor, int escopo, int r
 }
 	
 simbolo* RemoverSimbolo(simbolo* alvo){//retorna ponteiro para o próximo simbolo caso esteja removendo de algum lugar que não seja o fim da tabela
+	int i;
 	simbolo *ancora = (*alvo).seguinte;
 	free((*alvo).nome);
 	free((*alvo).valor);
-	if((*alvo).numArgs > 0) free((*alvo).funcArgsTypes);
+	if((*alvo).numArgs > 0){
+		free((*alvo).funcArgsTypes);
+		for(i = 0;i < (*alvo).numArgs;i++){
+			free((*alvo).funcArgs[i]);
+		}
+		free((*alvo).funcArgs);
+	} 
 	free(alvo);
 	return ancora;
 }
@@ -917,6 +925,7 @@ comparg:
 													(*ancora).conversion = None;
 													$$ = ancora;
 												}
+	|	
 	/*
 	|	function_call 							{
 													no* ancora = (no*)malloc(sizeof(no));
@@ -2095,7 +2104,9 @@ function_declaration:
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
 																					(*ancoraSimb).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
-																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes);
+																					(*ancoraSimb).funcArgs = (char**)malloc(numArgumentos * sizeof(char*));
+																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes,(*ancoraSimb).funcArgs);
+																					
 																				}
 																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
@@ -2392,6 +2403,7 @@ matharg:
 										(*ancora).valor = strdup($1);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = ConverteTableTipo((*ancoraSimb).tipo);
+										(*ancora).escopo = Top(pilhaEscopo)->valor;
 										free($1);
 										$$ = ancora;																
 									}

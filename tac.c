@@ -12,7 +12,7 @@ extern simbolo* tabelaSimbolos;
 
 int contadorGeral;//Contador para podermos gerar simbolos únicos sempre que necessário
 int jumpCounter;             
-
+int inFunctionDeclaration;
 /*
 Certo, a ideia vai ser percorrer a árvore sintática, gerando primeiro a tabela de símbolos. Nela vamos colocar todas as variáveis, e as strings.
 Para evitar conflito de nomes, todos os nomes gerados começam com '_'
@@ -23,6 +23,27 @@ Para evitar conflito de nomes, todos os nomes gerados começam com '_'
 int TACMathop(no* alvo, FILE* arq);
 int TACComparison(no* alvo, FILE* arq);
 void TACStatement(no* alvo, FILE* arq);
+void TACIf(no* alvo, FILE* arq);
+
+int VerificaArgumento(char* alvo, int escopo){
+	//Verifica se no escopo indicado existe uma função com argumento = alvo.
+	int i;
+	simbolo* ancoraSimb = tabelaSimbolos;
+	char* ancoraString;
+	while(ancoraSimb != NULL){
+		if((*ancoraSimb).tipo == FUNC_TABLE && (*ancoraSimb).escopo = escopo){
+			for(i = 0;i < (*ancoraSimb).numArgs;i++){
+				if(!strcmp(alvo,(*ancoraSimb).funcArgs[i])){
+					return i;
+				}
+			}
+		}
+		ancoraSimb = (*ancoraSimb).seguinte;
+	}
+	return -1;//Não achei
+}
+
+
 
 void DecideConversaoTAC(FILE* arq, no* alvo, int arg1, int arg2){
 	int value = (*alvo).conversion;
@@ -94,6 +115,7 @@ void TACFunctionCall(no* alvo, FILE* arq){//Função espera que você vá dar po
 int TACMathop2(no* alvo, FILE* arq){
 	char* ancora = (*alvo).nome;
 	int final;
+	int ancoraArg;
 	no* filho;
 
 
@@ -108,12 +130,21 @@ int TACMathop2(no* alvo, FILE* arq){
 		ancora = (*filho).nome;//<----- ANCORA AGORA É O NOME DO FILHO!
 
 		if(!strcmp(ancora,"ID")){
-			fprintf(arq,"mov $%d, %s%d\n",final,(*filho).valor,(*filho).refereTabela->escopo);
+			if(inFunctionDeclaration){
+				ancoraArg = VerificaArgumento((*filho).valor,(*filho).escopo);
+				if(ancoraArg != -1){
+					fprintf(arq,"mov $%d, #%d\n",final,ancoraArg);
+				}
+			}
+			else{
+				fprintf(arq,"mov $%d, %s%d\n",final,(*filho).valor,(*filho).refereTabela->escopo);
+			}
+			
 		}
 		else{
 			filho = (*filho).filhos[0];
 			if(!strcmp(ancora,"num")){
-				fprintf(arq,"add $%d, %s%d, 0\n",final,(*filho).valor,(*filho).refereTabela->escopo);
+				fprintf(arq,"mov $%d, %s%d\n",final,(*filho).valor,(*filho).refereTabela->escopo);
 			}
 			else{
 				TACFunctionCall(filho,arq);
@@ -372,12 +403,15 @@ TBM NÃO FUNCIONA pq eu já escrevi no maldito arquivo FOCK DE NOVO
 
 void TACFunctionDeclaration(no* alvo, FILE* arq){
 	char* ancora = (*alvo).valor;
+	inFunctionDeclaration = TRUE;
 	if(!strcmp(ancora,"main")){
 		fprintf(arq,"_main:\n");
 	}
 	else{
 		fprintf(arq,"%s:\n",ancora);
 	}
+	TACStatement((*alvo).filhos[2],arq);
+	inFunctionDeclaration = FALSE;
 }
 
 
@@ -406,12 +440,44 @@ void TACFor(no* alvo, FILE* arq){
 	fprintf(arq,"_L%d:\n",forEnd);
 }
 
-void TACIf(no* alvo, FILE* arq){
-	return;
+void TACElse(no* alvo, FILE* arq){
+	char* ancora = (*alvo).nome;
+	char* ancoraValor = (*alvo).valor;
+
+	if(!strcmp(ancora,"epsilon")){
+		return;
+	}
+	else if(!strcmp(ancora,"if")){
+		TACIf((*alvo).filhos[0],arq);
+	}
+	else if(!strcmp(ancora,"curly")){
+		TACStatement((*alvo).filhos[0],arq);
+	}
+	else{
+		TACSingleLine((*alvo).filhos[0],arq);
+	}
 }
 
+void TACIf(no* alvo, FILE* arq){
+	int comp;
+	int ifEnd = jumpCounter;
+	char* ancora = (*alvo).nome;
+	char* ancoraValor = (*alvo).valor;
 
+	jumpCounter++;
 
+	comp = TACComparison((*alvo).filhos[0],arq);
+	fprintf(arq,"brz _L%d, $%d\n",ifEnd,comp);
+	
+	if(!strcmp(ancora,"if")){
+		TACStatement((*alvo).filhos[1],arq);
+	}
+	else{
+		TACSingleLine((*alvo).filhos[1],arq);
+	}
+	fprintf(arq,"_L%d:\n",ifEnd);
+	TACElse((*alvo).filhos[2],arq);
+}
 
 void TACStatement(no* alvo, FILE* arq){
 	no* atual = alvo;
@@ -440,10 +506,6 @@ void TACStatement(no* alvo, FILE* arq){
 		}
 
 }
-
-
-
-
 
 void ConverterTac(){
 
@@ -490,6 +552,7 @@ void ConverterTac(){
 
 	contadorGeral = 0;
 	jumpCounter = 0;
+	inFunctionDeclaration = FALSE;
 	PercorrerArvoreString(saida,raiz);
 	fprintf(saida,"char _endl = '\n'\n");
 	fprintf(saida,".code\n");
