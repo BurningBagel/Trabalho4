@@ -2542,6 +2542,39 @@ num:
 										$$ = ancora;
 										free($1);
 									}
+	|	MINUS INTEGER 				{
+										no* ancora = (no*)malloc(sizeof(no));
+										(*ancora).numFilhos = 0;
+										char ancora2[] = "negative integer";
+										(*ancora).nome = strdup(ancora2);
+										(*ancora).tipo = YYSYMBOL_num;
+										(*ancora).refereTabela = NULL;
+										char *ancora3 = "-";
+										strcat(ancora3,$1);
+										(*ancora).valor = strdup(ancora3);
+										(*ancora).conversion = None;
+										(*ancora).tipoVirtual = Int;
+										$$ = ancora;
+										free($1);
+										free($2);
+									}
+
+	|	MINUS FLOATING 				{
+										no* ancora = (no*)malloc(sizeof(no));
+										(*ancora).numFilhos = 0;
+										char ancora2[] = "negative floating";
+										(*ancora).nome = strdup(ancora2);
+										(*ancora).tipo = YYSYMBOL_num;
+										(*ancora).refereTabela = NULL;
+										char *ancora3 = "-";
+										strcat(ancora3,$1);
+										(*ancora).valor = strdup(ancora3);
+										(*ancora).conversion = None;
+										(*ancora).tipoVirtual = Float;
+										$$ = ancora;
+										free($1);
+										free($2);
+									}
 	;
 
 

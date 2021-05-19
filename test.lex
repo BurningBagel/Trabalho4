@@ -40,8 +40,8 @@ ws			{delim}+
 letter			[a-zA-Z]
 digit			[0-9]
 id			{letter}({letter}|{digit}|"_")*
-integer		-?{digit}+
-floating		-?{digit}+\.{digit}+
+integer		{digit}+
+floating		{digit}+\.{digit}+
 string			\"(\\.|[^"\\])*\"
 charguts		[^\r\n]|\\a|\\b|\\f|\\r|\\t|\\v|\\?
 char			'{charguts}'
