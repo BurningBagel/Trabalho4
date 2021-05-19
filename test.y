@@ -2621,7 +2621,7 @@ void EscreverArvore(no* argumento,int profund){
 	ancora = (*argumento).nome;
 	ancoraValor = (*argumento).valor;
 
-	printf("%s %s\n",ancora,ancoraValor);
+	//printf("%s %s\n",ancora,ancoraValor);
 
 	switch((*argumento).tipo){
 		case YYSYMBOL_statement:
