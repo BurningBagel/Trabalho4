@@ -83,8 +83,6 @@ return		{printf("Achei um return na linha %d, coluna %d!\n",linhaCount,colunaCou
 void		{printf("Achei um void na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng; return VOID;}
 EMPTY		{printf("Achei um EMPTY na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng; return EMPTY;}
 {id}		{printf("Achei o id %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng; yylval.text = strdup(yytext); return ID;}
-{integer}	{printf("Achei o inteiro %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng; yylval.text = strdup(yytext); return INTEGER;}
-{floating}	{printf("Achei o float %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng; yylval.text = strdup(yytext); return FLOATING;}
 {string}	{printf("Achei a string %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng;  yylval.text = strdup(yytext); return STRING;}
 {char}		{printf("Achei o char %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng; yylval.text = strdup(yytext); return CHAR;}
 "("		{printf("Achei um ( na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng;return OPENPAR;}
@@ -111,6 +109,8 @@ EMPTY		{printf("Achei um EMPTY na linha %d, coluna %d!\n",linhaCount,colunaCount
 {negacao}	{printf("Achei uma negacao na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng;return NOT;}
 "&"		{printf("Achei um & na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng;return AMP;}
 "%"		{printf("Achei um %% na linha %d, coluna %d!\n",linhaCount,colunaCount);colunaCount += yyleng;return PCENT;}
+{integer}	{printf("Achei o inteiro %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng; yylval.text = strdup(yytext); return INTEGER;}
+{floating}	{printf("Achei o float %s na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng; yylval.text = strdup(yytext); return FLOATING;}
 .		{printf("Achei um token ->%s<- que não pertence a linguagem, na linha %d, coluna %d!\n",yytext,linhaCount,colunaCount);colunaCount += yyleng;}
 
 %%
