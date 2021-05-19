@@ -925,7 +925,6 @@ comparg:
 													(*ancora).conversion = None;
 													$$ = ancora;
 												}
-	|	
 	/*
 	|	function_call 							{
 													no* ancora = (no*)malloc(sizeof(no));
