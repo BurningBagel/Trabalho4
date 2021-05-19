@@ -1918,7 +1918,7 @@ args:
 								char ancora2[] = "mathop";
 								(*ancora).nome = strdup(ancora2);
 								(*ancora).refereTabela = NULL;
-								(*ancora).valor = strdup(($1)->valor);
+								(*ancora).valor = NULL;
 								(*ancora).conversion = None;
 								(*ancora).tipoVirtual = ($1)->tipoVirtual;
 								$$ = ancora;
@@ -2561,7 +2561,6 @@ num:
 										(*ancora).refereTabela = NULL;
 										char ancora3[50] = "-";
 										strcat(ancora3,$2);
-										printf("%s\n",ancora3);
 										(*ancora).valor = strdup(ancora3);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Int;
@@ -2579,7 +2578,6 @@ num:
 										(*ancora).refereTabela = NULL;
 										char ancora3[50] = "-";
 										strcat(ancora3,$2);
-										printf("%s\n",ancora3);
 										(*ancora).valor = strdup(ancora3);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Float;
