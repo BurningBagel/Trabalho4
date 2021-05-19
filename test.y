@@ -2559,8 +2559,8 @@ num:
 										(*ancora).nome = strdup(ancora2);
 										(*ancora).tipo = YYSYMBOL_num;
 										(*ancora).refereTabela = NULL;
-										char *ancora3 = "-";
-										strcat(ancora3,$1);
+										char ancora3[50] = "-";
+										strcat(ancora3,$2);
 										(*ancora).valor = strdup(ancora3);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Int;
@@ -2576,8 +2576,8 @@ num:
 										(*ancora).nome = strdup(ancora2);
 										(*ancora).tipo = YYSYMBOL_num;
 										(*ancora).refereTabela = NULL;
-										char *ancora3 = "-";
-										strcat(ancora3,$1);
+										char ancora3[50] = "-";
+										strcat(ancora3,$2);
 										(*ancora).valor = strdup(ancora3);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Float;
