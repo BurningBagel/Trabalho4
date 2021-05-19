@@ -408,7 +408,7 @@ void TACFunctionDeclaration(no* alvo, FILE* arq){
 		fprintf(arq,"_main:\n");
 	}
 	else{
-		fprintf(arq,"%s:\n",ancora);
+		fprintf(arq,"%s%d:\n",ancora,(*alvo).refereTabela->escopo);
 	}
 	TACStatement((*alvo).filhos[2],arq);
 	inFunctionDeclaration = FALSE;
