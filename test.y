@@ -2686,7 +2686,7 @@ void EscreverArvore(no* argumento,int profund){
 			PrintLines(profund);
 			printf(">(\n");
 			PrintLines(profund);
-			printf(">%s\n",ancora);
+			printf(">%s\n",ancoraValor);
 			PrintLines(profund);
 			printf(">)\n");
 		break;
