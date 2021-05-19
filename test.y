@@ -2169,7 +2169,6 @@ function_declaration:
 																				free($2);
 																				(*ancora).conversion = None;
 																				(*ancora).tipoVirtual = 0;
-																				$$ = ancora;
 																			}
 		OPENCURLY statement CLOSECURLY										{
 																				Pop(pilhaEscopo);
