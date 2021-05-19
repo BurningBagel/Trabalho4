@@ -2561,6 +2561,7 @@ num:
 										(*ancora).refereTabela = NULL;
 										char ancora3[50] = "-";
 										strcat(ancora3,$2);
+										printf("%s\n",ancora3);
 										(*ancora).valor = strdup(ancora3);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Int;
@@ -2578,6 +2579,7 @@ num:
 										(*ancora).refereTabela = NULL;
 										char ancora3[50] = "-";
 										strcat(ancora3,$2);
+										printf("%s\n",ancora3);
 										(*ancora).valor = strdup(ancora3);
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Float;
