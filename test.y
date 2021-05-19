@@ -2685,7 +2685,7 @@ void EscreverArvore(no* argumento,int profund){
 			printf(">read\n");
 			PrintLines(profund);
 			printf(">(\n");
-			PrintLines(profund);
+			PrintLines(profund+1);
 			printf(">%s\n",ancoraValor);
 			PrintLines(profund);
 			printf(">)\n");
@@ -2697,7 +2697,7 @@ void EscreverArvore(no* argumento,int profund){
 				printf(">write\n");
 				PrintLines(profund);
 				printf(">(\n");
-				EscreverArvore((*argumento).filhos[0],profund);
+				EscreverArvore((*argumento).filhos[0],profund+1);
 				PrintLines(profund);
 				printf(">)\n");
 			}
@@ -2706,8 +2706,8 @@ void EscreverArvore(no* argumento,int profund){
 				printf(">write\n");
 				PrintLines(profund);
 				printf(">(\n");
-				PrintLines(profund);
-				printf(">%s\n",ancora);
+				PrintLines(profund+1);
+				printf(">%s\n",ancoraValor);
 				PrintLines(profund);
 				printf(">)\n");
 			}
@@ -2719,7 +2719,7 @@ void EscreverArvore(no* argumento,int profund){
 				printf(">write\n");
 				PrintLines(profund);
 				printf(">(\n");
-				EscreverArvore((*argumento).filhos[0],profund);
+				EscreverArvore((*argumento).filhos[0],profund+1);
 				PrintLines(profund);
 				printf(">)\n");
 			}
@@ -2728,8 +2728,8 @@ void EscreverArvore(no* argumento,int profund){
 				printf(">write\n");
 				PrintLines(profund);
 				printf(">(\n");
-				PrintLines(profund);
-				printf(">%s\n",ancora);
+				PrintLines(profund+1);
+				printf(">%s\n",ancoraValor);
 				PrintLines(profund);
 				printf(">)\n");
 			}
@@ -2739,7 +2739,7 @@ void EscreverArvore(no* argumento,int profund){
 			PrintLines(profund);
 			printf(">return\n");
 			if(strcmp(ancora,"null")){
-				EscreverArvore((*argumento).filhos[0],profund);
+				EscreverArvore((*argumento).filhos[0],profund+1);
 			}
 		break;
 
@@ -2749,7 +2749,7 @@ void EscreverArvore(no* argumento,int profund){
 			PrintLines(profund);
 			printf(">(\n");
 			for(i = 0; i < 3; i++){
-				EscreverArvore((*argumento).filhos[i],profund);
+				EscreverArvore((*argumento).filhos[i],profund+1);
 				PrintLines(profund);
 				if(i != 2) printf(">;\n");
 			}
@@ -2757,7 +2757,7 @@ void EscreverArvore(no* argumento,int profund){
 			printf(">)\n");
 			PrintLines(profund);
 			printf(">{\n");
-			EscreverArvore((*argumento).filhos[3],profund);
+			EscreverArvore((*argumento).filhos[3],profund+1);
 			PrintLines(profund);
 			printf(">}\n");
 		break;
@@ -2768,7 +2768,7 @@ void EscreverArvore(no* argumento,int profund){
 			PrintLines(profund);
 			printf(">(\n");
 
-			EscreverArvore((*argumento).filhos[0],profund);
+			EscreverArvore((*argumento).filhos[0],profund+1);
 
 			PrintLines(profund);
 			printf(">)\n");
@@ -2828,7 +2828,7 @@ void EscreverArvore(no* argumento,int profund){
 			printf(">is_set\n");
 			PrintLines(profund);
 			printf(">(\n");
-			EscreverArvore((*argumento).filhos[0],profund);
+			EscreverArvore((*argumento).filhos[0],profund+1);
 			PrintLines(profund);
 			printf(">)\n");
 		break;
@@ -2837,7 +2837,7 @@ void EscreverArvore(no* argumento,int profund){
 			printf(">add\n");
 			PrintLines(profund);
 			printf(">(\n");
-			EscreverArvore((*argumento).filhos[0],profund);
+			EscreverArvore((*argumento).filhos[0],profund+1);
 			PrintLines(profund);
 			printf(">)\n");
 		break;
@@ -2846,7 +2846,7 @@ void EscreverArvore(no* argumento,int profund){
 			printf(">remove\n");
 			PrintLines(profund);
 			printf(">(\n");
-			EscreverArvore((*argumento).filhos[0],profund);
+			EscreverArvore((*argumento).filhos[0],profund+1);
 			PrintLines(profund);
 			printf(">)\n");
 		break;
@@ -2855,7 +2855,7 @@ void EscreverArvore(no* argumento,int profund){
 			printf(">exists\n");
 			PrintLines(profund);
 			printf(">(\n");
-			EscreverArvore((*argumento).filhos[0],profund);
+			EscreverArvore((*argumento).filhos[0],profund+1);
 			PrintLines(profund);
 			printf(">)\n");
 		break;
@@ -2888,14 +2888,14 @@ void EscreverArvore(no* argumento,int profund){
 			PrintLines(profund);
 			printf(">(\n");
 			if(!strcmp(ancora,"function_call")){
-				EscreverArvore((*argumento).filhos[0],profund);
+				EscreverArvore((*argumento).filhos[0],profund+1);
 			}
 			PrintLines(profund);
 			printf(">)\n");
 		break;
 		case YYSYMBOL_args:
 			EscreverArvore((*argumento).filhos[0],profund);
-			EscreverArvore((*argumento).filhos[1],profund);
+			EscreverArvore((*argumento).filhos[1],profund+1);
 		break;
 		case YYSYMBOL_args1:
 			if(!strcmp(ancora,"comma")){
@@ -2914,7 +2914,7 @@ void EscreverArvore(no* argumento,int profund){
 			if(!strcmp(ancora,"comma")){
 				PrintLines(profund);
 				printf(">,\n");
-				EscreverArvore((*argumento).filhos[1],profund);
+				EscreverArvore((*argumento).filhos[1],profund+1);
 			}
 		break;
 		case YYSYMBOL_function_declaration:
