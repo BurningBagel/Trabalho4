@@ -32,9 +32,8 @@ int textCounter;
 int VerificaTipoArgs(no* alvo, int* vector, int profund){
 	int result;
 	no* next;
-	printf("%d %d\n",vector[profund],(*alvo).tipoVirtual);
 
-	result = (vector[profund] != (*alvo).tipoVirtual);
+	result = (vector[profund] == (*alvo).tipoVirtual);
 
 	if(!strcmp((*alvo).filhos[1]->nome,"comma")){
 		next = (*alvo).filhos[1]->filhos[1];
