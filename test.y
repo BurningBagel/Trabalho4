@@ -21,6 +21,7 @@ simbolo* topo;
 no* raiz;
 pilha* pilhaEscopo;
 int errorCheck;
+no* ancoraGlobalNo;
 
 int escopoCounter;
 int funcArgsCounter;
@@ -2073,26 +2074,22 @@ function_declaration:
 																					dentroDeclaraFunc = TRUE;
 																				}
 																			}
-		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
+		OPENPAR funcargs CLOSEPAR  											{
 																				int numArgumentos;
 																				numArgumentos = ContaFuncArgs($5);
 																				$4 = NULL;
 																				$6 = NULL;
-																				$7 = NULL;
-																				$9 = NULL;
 																				no* ancora = (no*)malloc(sizeof(no));
 																				int tipoRetorno = ConverteRetornoTipo($1);
 																				int realEscopo;
 																				(*ancora).numFilhos = 3;
 																				(*ancora).filhos[0] = $1;
 																				(*ancora).filhos[1] = $5;
-																				(*ancora).filhos[2] = $8;
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
 																				char ancora2[] = "type";
 																				(*ancora).nome = strdup(ancora2);
 																				simbolo *ancoraSimb = ProcurarTabela($2);
-																				Pop(pilhaEscopo);
-																				realEscopo = Top(pilhaEscopo)->valor;
+																				realEscopo = Top(pilhaEscopo)->anterior->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
 																					errorCheck = TRUE;
@@ -2113,7 +2110,15 @@ function_declaration:
 																				(*ancora).conversion = None;
 																				(*ancora).tipoVirtual = 0;
 																				$$ = ancora;
+																				ancoraGlobalNo = ancora;
+																			}
+		OPENCURLY statement CLOSECURLY 										{
+																				Pop(pilhaEscopo);
+																				(*ancoraGlobalNo).filhos[2] = $8;
 																				dentroDeclaraFunc = FALSE;
+																				$7 = NULL;
+																				$9 = NULL;
+																				ancoraGlobalNo = NULL;
 																			}
 
 	|	VOID ID  
@@ -2129,15 +2134,15 @@ function_declaration:
 																					dentroDeclaraFunc = TRUE;
 																				}
 																			}
-		OPENPAR funcargs CLOSEPAR OPENCURLY statement CLOSECURLY 			{
+		OPENPAR funcargs CLOSEPAR  											{
 																				int numArgumentos;
 																				numArgumentos = ContaFuncArgs($5);
 																				$1 = NULL;
 																				$4 = NULL;
 																				$6 = NULL;
-																				$7 = NULL;
-																				$9 = NULL;
+																				
 																				no* ancora = (no*)malloc(sizeof(no));
+																				ancoraGlobalNo = ancora;
 																				int realEscopo;
 																				(*ancora).numFilhos = 2;
 																				(*ancora).filhos[0] = $5;
@@ -2146,8 +2151,7 @@ function_declaration:
 																				char ancora2[] = "void";
 																				(*ancora).nome = strdup(ancora2);
 																				simbolo *ancoraSimb = ProcurarTabela($2);
-																				Pop(pilhaEscopo);
-																				realEscopo = Top(pilhaEscopo)->valor;
+																				realEscopo = Top(pilhaEscopo)->anterior->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
 																					errorCheck = TRUE;
@@ -2167,7 +2171,14 @@ function_declaration:
 																				(*ancora).conversion = None;
 																				(*ancora).tipoVirtual = 0;
 																				$$ = ancora;
+																			}
+		OPENCURLY statement CLOSECURLY										{
+																				Pop(pilhaEscopo);
+																				$7 = NULL;
+																				$9 = NULL;
+																				(*ancoraGlobalNo).filhos[2] = $8;
 																				dentroDeclaraFunc = FALSE;
+																				ancoraGlobalNo = NULL;
 																			}
 	;
 	
@@ -3025,6 +3036,7 @@ int main(int argc, char **argv){
 	funcArgsCounter = 0;
 	textCounter = 0;
 	errorCheck = FALSE;
+	ancoraGlobalNo = NULL;
 	pilhaEscopo = CriarStack(0);
 	dentroDeclaraFunc = FALSE;
 	if (argc > 0){
