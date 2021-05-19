@@ -523,11 +523,11 @@ void ConverterTac(){
 		if((*alvo).tipo != FUNC_TABLE){//Para que o sistema de escopo funcione, o id de cada variavel é seguido do número de seu escopo
 			switch((*alvo).tipo){
 				case INT_TABLE:
-				fprintf(saida,"int %s%d = %s\n",(*alvo).nome,(*alvo).escopo,(*alvo).valor);
+				fprintf(saida,"int %s%d = 0\n",(*alvo).nome,(*alvo).escopo);
 				break;
 
 				case FLOAT_TABLE:
-				fprintf(saida,"float %s%d = %sf\n",(*alvo).nome,(*alvo).escopo,(*alvo).valor);
+				fprintf(saida,"float %s%d = 0.0f\n",(*alvo).nome,(*alvo).escopo);
 				break;
 
 				case CHAR_TABLE:
@@ -554,7 +554,7 @@ void ConverterTac(){
 	jumpCounter = 0;
 	inFunctionDeclaration = FALSE;
 	PercorrerArvoreString(saida,raiz);
-	fprintf(saida,"char _endl = '\n'\n");
+	fprintf(saida,"char _endl = '\\n'\n");
 	fprintf(saida,".code\n");
 
 
