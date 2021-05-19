@@ -1427,7 +1427,7 @@ else:
 														(*ancora).conversion = None;
 														(*ancora).tipoVirtual = 0;
 														$$ = ancora;
-														free($1);
+														$1 = NULL;
 													}
 |	ELSE single_line_statement						{
 														no* ancora = (no*)malloc(sizeof(no));
@@ -2565,7 +2565,7 @@ num:
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Int;
 										$$ = ancora;
-										free($1);
+										$1 = NULL;
 										free($2);
 									}
 
@@ -2582,7 +2582,7 @@ num:
 										(*ancora).conversion = None;
 										(*ancora).tipoVirtual = Float;
 										$$ = ancora;
-										free($1);
+										$1 = NULL;
 										free($2);
 									}
 	;
