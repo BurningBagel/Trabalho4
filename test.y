@@ -2146,7 +2146,6 @@ function_declaration:
 																				int realEscopo;
 																				(*ancora).numFilhos = 2;
 																				(*ancora).filhos[0] = $5;
-																				(*ancora).filhos[1] = $8;
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
 																				char ancora2[] = "void";
 																				(*ancora).nome = strdup(ancora2);
@@ -2176,7 +2175,7 @@ function_declaration:
 																				Pop(pilhaEscopo);
 																				$8 = NULL;
 																				$10 = NULL;
-																				(*ancoraGlobalNo).filhos[2] = $9;
+																				(*ancoraGlobalNo).filhos[1] = $9;
 																				$$ = ancoraGlobalNo;
 																				dentroDeclaraFunc = FALSE;
 																				ancoraGlobalNo = NULL;
