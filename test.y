@@ -2109,7 +2109,6 @@ function_declaration:
 																				free($2);
 																				(*ancora).conversion = None;
 																				(*ancora).tipoVirtual = 0;
-																				$$ = ancora;
 																				ancoraGlobalNo = ancora;
 																			}
 		OPENCURLY statement CLOSECURLY 										{
@@ -2118,6 +2117,7 @@ function_declaration:
 																				dentroDeclaraFunc = FALSE;
 																				$8 = NULL;
 																				$10 = NULL;
+																				$$ = ancoraGlobalNo;
 																				ancoraGlobalNo = NULL;
 																			}
 
@@ -2177,6 +2177,7 @@ function_declaration:
 																				$8 = NULL;
 																				$10 = NULL;
 																				(*ancoraGlobalNo).filhos[2] = $9;
+																				$$ = ancoraGlobalNo;
 																				dentroDeclaraFunc = FALSE;
 																				ancoraGlobalNo = NULL;
 																			}
