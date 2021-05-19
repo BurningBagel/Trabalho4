@@ -144,7 +144,7 @@ int TACMathop2(no* alvo, FILE* arq){
 		else{
 			filho = (*filho).filhos[0];
 			if(!strcmp(ancora,"num")){
-				fprintf(arq,"mov $%d, %s%d\n",final,(*filho).valor,(*filho).refereTabela->escopo);
+				fprintf(arq,"mov $%d, %s\n",final,(*filho).valor);
 			}
 			else{
 				TACFunctionCall(filho,arq);
