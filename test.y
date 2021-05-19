@@ -2114,10 +2114,10 @@ function_declaration:
 																			}
 		OPENCURLY statement CLOSECURLY 										{
 																				Pop(pilhaEscopo);
-																				(*ancoraGlobalNo).filhos[2] = $8;
+																				(*ancoraGlobalNo).filhos[2] = $9;
 																				dentroDeclaraFunc = FALSE;
-																				$7 = NULL;
-																				$9 = NULL;
+																				$8 = NULL;
+																				$10 = NULL;
 																				ancoraGlobalNo = NULL;
 																			}
 
@@ -2174,9 +2174,9 @@ function_declaration:
 																			}
 		OPENCURLY statement CLOSECURLY										{
 																				Pop(pilhaEscopo);
-																				$7 = NULL;
-																				$9 = NULL;
-																				(*ancoraGlobalNo).filhos[2] = $8;
+																				$8 = NULL;
+																				$10 = NULL;
+																				(*ancoraGlobalNo).filhos[2] = $9;
 																				dentroDeclaraFunc = FALSE;
 																				ancoraGlobalNo = NULL;
 																			}
