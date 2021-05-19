@@ -29,9 +29,9 @@ int VerificaArgumento(char* alvo, int escopo){
 	//Verifica se no escopo indicado existe uma função com argumento = alvo.
 	int i;
 	simbolo* ancoraSimb = tabelaSimbolos;
-	char* ancoraString;
+	//char* ancoraString;
 	while(ancoraSimb != NULL){
-		if((*ancoraSimb).tipo == FUNC_TABLE && (*ancoraSimb).escopo = escopo){
+		if((*ancoraSimb).tipo == FUNC_TABLE && (*ancoraSimb).escopo == escopo){
 			for(i = 0;i < (*ancoraSimb).numArgs;i++){
 				if(!strcmp(alvo,(*ancoraSimb).funcArgs[i])){
 					return i;
@@ -442,7 +442,7 @@ void TACFor(no* alvo, FILE* arq){
 
 void TACElse(no* alvo, FILE* arq){
 	char* ancora = (*alvo).nome;
-	char* ancoraValor = (*alvo).valor;
+	//char* ancoraValor = (*alvo).valor;
 
 	if(!strcmp(ancora,"epsilon")){
 		return;
@@ -462,7 +462,7 @@ void TACIf(no* alvo, FILE* arq){
 	int comp;
 	int ifEnd = jumpCounter;
 	char* ancora = (*alvo).nome;
-	char* ancoraValor = (*alvo).valor;
+	//char* ancoraValor = (*alvo).valor;
 
 	jumpCounter++;
 

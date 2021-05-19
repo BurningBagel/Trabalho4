@@ -48,7 +48,7 @@ int VerificaTipoArgs(no* alvo, int* vector, int profund){
 void PreencheFuncArgs(no* alvo, int num, int* vector, char** names){
 	if(!strcmp((*alvo).nome,"epsilon")) return;
 	else{
-		names[vector] = strdup((*alvo).valor);
+		names[num] = strdup((*alvo).valor);
 		vector[num] = (*alvo).filhos[0]->tipoVirtual;
 		if (strcmp((*alvo).nome,"single")){
 			PreencheFuncArgs((*alvo).filhos[1],num + 1,vector,names);
@@ -2158,7 +2158,8 @@ function_declaration:
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
 																					(*ancoraSimb).funcArgsTypes = (int*)malloc(numArgumentos * sizeof(int));
-																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes);
+																					(*ancoraSimb).funcArgs = (char**)malloc(numArgumentos * sizeof(char*));
+																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes,(*ancoraSimb).funcArgs);
 																				}
 																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
