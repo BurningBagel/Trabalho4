@@ -31,7 +31,7 @@ int VerificaArgumento(char* alvo, int escopo){
 	simbolo* ancoraSimb = tabelaSimbolos;
 	//char* ancoraString;
 	while(ancoraSimb != NULL){
-		if((*ancoraSimb).tipo == FUNC_TABLE && (*ancoraSimb).escopo == escopo){
+		if((*ancoraSimb).tipo == FUNC_TABLE && (*ancoraSimb).escopoArgs == escopo){
 			for(i = 0;i < (*ancoraSimb).numArgs;i++){
 				if(!strcmp(alvo,(*ancoraSimb).funcArgs[i])){
 					return i;
@@ -134,6 +134,9 @@ int TACMathop2(no* alvo, FILE* arq){
 				ancoraArg = VerificaArgumento((*filho).valor,(*filho).escopo);
 				if(ancoraArg != -1){
 					fprintf(arq,"mov $%d, #%d\n",final,ancoraArg);
+				}
+				else{
+					fprintf(arq,"mov $%d, %s%d\n",final,(*filho).valor,(*filho).refereTabela->escopo);
 				}
 			}
 			else{

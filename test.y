@@ -244,9 +244,10 @@ simbolo* CriarSimbolo(char* nome, int tipo, char* valor, int escopo){
 	return ancora;
 }
 
-simbolo* CriarSimboloFuncao(char* nome, int tipo, char* valor, int escopo, int retorno){
+simbolo* CriarSimboloFuncao(char* nome, int tipo, char* valor, int escopo, int escopoArgs, int retorno){
 	simbolo* ancora = CriarSimbolo(nome,tipo,valor,escopo);
 	(*ancora).returnType = retorno;
+	(*ancora).escopoArgs = escopoArgs;
 	return ancora;
 }
 	
@@ -2082,6 +2083,7 @@ function_declaration:
 																				no* ancora = (no*)malloc(sizeof(no));
 																				int tipoRetorno = ConverteRetornoTipo($1);
 																				int realEscopo;
+																				int escopoArgs;
 																				(*ancora).numFilhos = 3;
 																				(*ancora).filhos[0] = $1;
 																				(*ancora).filhos[1] = $5;
@@ -2090,12 +2092,13 @@ function_declaration:
 																				(*ancora).nome = strdup(ancora2);
 																				simbolo *ancoraSimb = ProcurarTabela($2);
 																				realEscopo = Top(pilhaEscopo)->anterior->valor;
+																				escopoArgs = Top(pilhaEscopo)->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
 																					errorCheck = TRUE;
 																				}
 																				else{
-																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,tipoRetorno);
+																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,escopoArgs,tipoRetorno);
 																				}
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
@@ -2144,6 +2147,7 @@ function_declaration:
 																				no* ancora = (no*)malloc(sizeof(no));
 																				ancoraGlobalNo = ancora;
 																				int realEscopo;
+																				int escopoArgs;
 																				(*ancora).numFilhos = 2;
 																				(*ancora).filhos[0] = $5;
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
@@ -2151,12 +2155,13 @@ function_declaration:
 																				(*ancora).nome = strdup(ancora2);
 																				simbolo *ancoraSimb = ProcurarTabela($2);
 																				realEscopo = Top(pilhaEscopo)->anterior->valor;
+																				escopoArgs = Top(pilhaEscopo)->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
 																					errorCheck = TRUE;
 																				}
 																				else{
-																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,Void);
+																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,escopoArgs,Void);
 																				}
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
