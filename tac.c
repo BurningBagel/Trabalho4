@@ -220,7 +220,7 @@ int TACComparg(no* alvo, FILE* arq){
 	if(!strcmp(ancora,"comparison")){
 		//Aqui tem uma coisa perigosa. Para que o TACComparison coloque o resultado no temp correto, precisamos reduzir 
 		//o contador geral antes de chamar a função
-		contadorGeral--;
+		//contadorGeral--;
 		TACComparison((*alvo).filhos[0],arq);
 	}	
 	else{
@@ -292,6 +292,7 @@ void TACReturn(no* alvo, FILE* arq){
 	else{
 		fprintf(arq,"return\n");
 	}
+	//contadorGeral--;
 }
 
 void TACWrite(no* alvo, FILE* arq){
@@ -325,7 +326,7 @@ void TACWrite(no* alvo, FILE* arq){
 		fprintf(arq, "brnz _L%d\n", jumpCounter-1);
 	}
 
-	contadorGeral--;	
+	//contadorGeral--;	
 }
 
 void TACWriteLn(no* alvo, FILE* arq){
@@ -340,7 +341,7 @@ void TACAssignment(no* alvo, FILE* arq){
 	int result = TACMathop((*alvo).filhos[0],arq);
 	DecideConversaoTAC(arq,alvo,result,0);
 	fprintf(arq,"mov %s%d, $%d\n",(*alvo).valor,(*alvo).refereTabela->escopo,result);
-	contadorGeral--;
+	//contadorGeral--;
 }
 
 void TACRead(no* alvo, FILE* arq){
