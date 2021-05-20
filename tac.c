@@ -220,7 +220,7 @@ int TACComparg(no* alvo, FILE* arq){
 	if(!strcmp(ancora,"comparison")){
 		//Aqui tem uma coisa perigosa. Para que o TACComparison coloque o resultado no temp correto, precisamos reduzir 
 		//o contador geral antes de chamar a função
-		//contadorGeral--;
+		contadorGeral--;
 		TACComparison((*alvo).filhos[0],arq);
 	}	
 	else{
