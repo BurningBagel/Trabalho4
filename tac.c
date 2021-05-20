@@ -92,7 +92,7 @@ void TACStackArgs(no* alvo, FILE* arq){
 	char* ancoraFilho = (*alvo).filhos[1]->nome;
 	int arg = TACMathop((*alvo).filhos[0],arq);
 
-	fprintf(arq,"push $%d\n",arg);
+	fprintf(arq,"param $%d\n",arg);
 
 	if(!strcmp(ancoraFilho,"comma")){
 		TACStackArgs((*alvo).filhos[1]->filhos[1],arq);
@@ -108,7 +108,11 @@ void TACFunctionCall(no* alvo, FILE* arq){//Função espera que você vá dar po
 	if(!strcmp(ancora,"function_call")){
 		TACStackArgs((*alvo).filhos[0],arq);
 	}
-	fprintf(arq,"call %s%d\n",(*alvo).valor,escopoAlvo);
+	fprintf(arq,"call %s%d",(*alvo).valor,escopoAlvo);
+	if((*ancoraSimb).numArgs > 0){
+		fprintf(arq,", %d",(*ancoraSimb).numArgs);
+	}
+	fprintf(arq,"\n");
 }
 
 
