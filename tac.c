@@ -224,7 +224,7 @@ int TACComparg(no* alvo, FILE* arq){
 		TACComparison((*alvo).filhos[0],arq);
 	}	
 	else{
-		(void)TACMathop((*alvo).filhos[0],arq);
+		final = TACMathop((*alvo).filhos[0],arq);
 	}
 	
 	return final;
