@@ -398,6 +398,8 @@ Usa o ponteiro do
 
 TBM NÃO FUNCIONA pq eu já escrevi no maldito arquivo FOCK DE NOVO
 
+PRONTO coloquei os nomes dos argumentos na tabela num vetor de strings. Agora o TAC procura por esses nomes qdo vai colocar um argumento,
+e se ver que está dentro de uma função com esse ID como argumento, ele coloca #x no lugar, sendo x a posição dele no vetor.
 
 */
 

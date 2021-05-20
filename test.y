@@ -1867,7 +1867,7 @@ function_call:
 																				}
 																				(*ancora).conversion = None;
 																				$$ = ancora;
-																				$1 = NULL;
+																				free($1);
 																				$2 = NULL;
 																				$4 = NULL;
 																			}
@@ -1895,7 +1895,7 @@ function_call:
 																				}
 																				(*ancora).conversion = None;
 																				$$ = ancora;
-																				$1 = NULL;
+																				free($1);
 																				$2 = NULL;
 																				$3 = NULL;
 																			}
