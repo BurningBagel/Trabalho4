@@ -2421,11 +2421,11 @@ matharg:
 										simbolo *ancoraSimb = VerificarEscopo($1);
 										if(ancoraSimb != NULL){ 
 											(*ancora).refereTabela = ancoraSimb;
+											(*ancora).tipoVirtual = ConverteTableTipo((*ancoraSimb).tipo);
 										}
 										else{
 											printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
 											(*ancora).refereTabela = NULL;
-											(*ancora).tipoVirtual = ConverteTableTipo((*ancoraSimb).tipo);
 											errorCheck = TRUE;
 										}
 										(*ancora).valor = strdup($1);
