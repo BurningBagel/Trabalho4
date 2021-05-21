@@ -3035,7 +3035,7 @@ void ApagarArvore(no* alvo){
 
 
 int main(int argc, char **argv){
-	topo = tabelaSimbolos;
+	tabelaSimbolos = NULL;
 	//raiz = (no*)malloc(sizeof(no));
 	//variavelRaiz = TRUE;
 	++argv;
