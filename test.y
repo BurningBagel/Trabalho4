@@ -2424,7 +2424,7 @@ matharg:
 											(*ancora).tipoVirtual = ConverteTableTipo((*ancoraSimb).tipo);
 										}
 										else{
-											printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
+											printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
 											(*ancora).refereTabela = NULL;
 											errorCheck = TRUE;
 										}
