@@ -616,6 +616,7 @@ statement:
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
 																$$ = ancora;
+																if(raiz == NULL) raiz = ancora;
 															}
 	|	OPENCURLY 
 															{
@@ -640,6 +641,7 @@ statement:
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
 																Pop(pilhaEscopo);
+																if(raiz == NULL) raiz = ancora;
 															}
 		
 	|	function_declaration statement 						{
@@ -657,6 +659,7 @@ statement:
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
 																$$ = ancora;
+																if(raiz == NULL) raiz = ancora;
 															}
 	
 	|	for statement										{
@@ -674,6 +677,7 @@ statement:
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
 																$$ = ancora;
+																if(raiz == NULL) raiz = ancora;
 															}
 	|	if statement										{
 																no* ancora = (no*)malloc(sizeof(no));
@@ -690,6 +694,7 @@ statement:
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
 																$$ = ancora;
+																if(raiz == NULL) raiz = ancora;
 															}
 	|	iteracao statement 									{
 																no* ancora = (no*)malloc(sizeof(no));
@@ -706,6 +711,7 @@ statement:
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
 																$$ = ancora;
+																if(raiz == NULL) raiz = ancora;
 															}
 	|	variable_declaration SEMICOLON statement 			{
 																no* ancora = (no*)malloc(sizeof(no));
@@ -723,6 +729,7 @@ statement:
 																$2 = NULL;
 																(*ancora).conversion = None;
 																(*ancora).tipoVirtual = 0;
+																if(raiz == NULL) raiz = ancora;
 															}
 
 	|	%empty												{
@@ -737,6 +744,7 @@ statement:
 																(*ancora).tipoVirtual = 0;
 																(*ancora).escopo = 0;
 																$$ = ancora;
+																if(raiz == NULL) raiz = ancora;
 															}
 	;
 	
