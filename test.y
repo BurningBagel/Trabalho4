@@ -2056,7 +2056,7 @@ funcargs:
 									(*ancora).tipoVirtual = 0;
 									$$ = ancora;
 									errorCheck = TRUE;
-									yyerrok;
+									// ydyerrok;
 								}
 	;
 	
