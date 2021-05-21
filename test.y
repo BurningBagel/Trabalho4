@@ -2099,6 +2099,7 @@ function_declaration:
 																				}
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,escopoArgs,tipoRetorno);
+																					(*ancora).refereTabela->numArgs = numArgumentos;
 																				}
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
@@ -2107,7 +2108,6 @@ function_declaration:
 																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes,(*ancoraSimb).funcArgs);
 																					
 																				}
-																				(*ancora).refereTabela->numArgs = numArgumentos;
 																				(*ancora).valor = strdup($2);
 																				free($2);
 																				(*ancora).conversion = None;
@@ -2162,6 +2162,7 @@ function_declaration:
 																				}
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,escopoArgs,Void);
+																					(*ancora).refereTabela->numArgs = numArgumentos;
 																				}
 																				if(numArgumentos > 0){
 																					ancoraSimb = (*ancora).refereTabela;
@@ -2169,7 +2170,7 @@ function_declaration:
 																					(*ancoraSimb).funcArgs = (char**)malloc(numArgumentos * sizeof(char*));
 																					PreencheFuncArgs($5,0,(*ancoraSimb).funcArgsTypes,(*ancoraSimb).funcArgs);
 																				}
-																				(*ancora).refereTabela->numArgs = numArgumentos;
+																				
 																				(*ancora).valor = strdup($2);
 																				free($2);
 																				(*ancora).conversion = None;
