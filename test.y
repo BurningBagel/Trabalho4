@@ -2090,8 +2090,8 @@ function_declaration:
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
 																				char ancora2[] = "type";
 																				(*ancora).nome = strdup(ancora2);
-																				simbolo *ancoraSimb = ProcurarTabela($2);
 																				realEscopo = Top(pilhaEscopo)->anterior->valor;
+																				simbolo *ancoraSimb = ProcurarTabelaEscopo($2,realEscopo);
 																				escopoArgs = Top(pilhaEscopo)->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
@@ -2153,8 +2153,8 @@ function_declaration:
 																				(*ancora).tipo = YYSYMBOL_function_declaration;
 																				char ancora2[] = "void";
 																				(*ancora).nome = strdup(ancora2);
-																				simbolo *ancoraSimb = ProcurarTabela($2);
 																				realEscopo = Top(pilhaEscopo)->anterior->valor;
+																				simbolo *ancoraSimb = ProcurarTabelaEscopo($2,realEscopo);
 																				escopoArgs = Top(pilhaEscopo)->valor;
 																				if(ancoraSimb != NULL){
 																					printf("ERRO SEMANTICO! ID %s REDECLARADO COMO FUNCAO! LINHA: %d, COLUNA: %d \n",$2,linhaCount,colunaCount);
