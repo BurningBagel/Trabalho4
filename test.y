@@ -1622,6 +1622,7 @@ conjuntoop1:
 													simbolo *ancoraSimb = VerificarEscopo($1);
 													if(ancoraSimb != NULL){ 
 														(*ancora).refereTabela = ancoraSimb;
+														(*ancora).tipoVirtual = (*ancoraSimb).tipo;
 													}
 													else{
 														printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
@@ -1630,7 +1631,7 @@ conjuntoop1:
 													}
 													(*ancora).valor = strdup($1);
 													(*ancora).conversion = None;
-													(*ancora).tipoVirtual = (*ancoraSimb).tipo;
+													
 													free($1);
 													$$ = ancora;
 												}
@@ -1842,6 +1843,7 @@ function_call:
 																				no* ancora = (no*)malloc(sizeof(no));
 																				(*ancora).numFilhos = 1;
 																				(*ancora).filhos[0] = $3;
+																				int calledArgs;
 																				(*ancora).tipo = YYSYMBOL_function_call;
 																				char ancora2[] = "function_call";
 																				(*ancora).nome = strdup(ancora2);
@@ -1850,6 +1852,17 @@ function_call:
 																				if(ancoraSimb != NULL){ 
 																					(*ancora).refereTabela = ancoraSimb;
 																					(*ancora).tipoVirtual = (*ancoraSimb).returnType;
+																					calledArgs = ContaCallArgs($3);
+
+																					if((*ancora).refereTabela->numArgs != calledArgs){
+																						printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																						errorCheck = TRUE;
+																					}
+
+																					if(!VerificaTipoArgs($3,(*ancoraSimb).funcArgsTypes,0)){
+																						printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA ARGUMENTOS DE TIPOS ERRADOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																						errorCheck = TRUE;
+																					}
 																				}
 																				else{
 																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
@@ -1857,15 +1870,9 @@ function_call:
 																					(*ancora).tipoVirtual = 0;
 																					errorCheck = TRUE;
 																				}
-																				int calledArgs = ContaCallArgs($3);
-																				if((*ancora).refereTabela->numArgs != calledArgs){
-																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
-																					errorCheck = TRUE;
-																				}
-																				if(!VerificaTipoArgs($3,(*ancoraSimb).funcArgsTypes,0)){
-																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA ARGUMENTOS DE TIPOS ERRADOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
-																					errorCheck = TRUE;
-																				}
+																				
+																				
+																				
 																				(*ancora).conversion = None;
 																				$$ = ancora;
 																				free($1);
@@ -1883,6 +1890,11 @@ function_call:
 																				if(ancoraSimb != NULL){ 
 																					(*ancora).refereTabela = ancoraSimb;
 																					(*ancora).tipoVirtual = (*ancoraSimb).returnType;
+
+																					if((*ancoraSimb).numArgs != 0){
+																						printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
+																						errorCheck = TRUE;
+																					}
 																				}
 																				else{
 																					printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO! Linha: %d, Coluna: %d\n",$1,linhaCount,colunaCount);
@@ -1890,10 +1902,7 @@ function_call:
 																					(*ancora).tipoVirtual = 0;
 																					errorCheck = TRUE;
 																				}
-																				if((*ancoraSimb).numArgs != 0){
-																					printf("ERRO SEMANTICO! CHAMADA DE FUNCAO %s USA QUANTIDADE ERRADA DE ARGUMENTOS! Linha: %d, Coluna %d\n",$1,linhaCount,colunaCount);
-																					errorCheck = TRUE;
-																				}
+																				
 																				(*ancora).conversion = None;
 																				$$ = ancora;
 																				free($1);
@@ -2076,8 +2085,8 @@ function_declaration:
 																				}
 																			}
 		OPENPAR funcargs CLOSEPAR  											{
-																				int numArgumentos;
-																				numArgumentos = ContaFuncArgs($5);
+																				int numArgumentos = 0;
+																				
 																				$4 = NULL;
 																				$6 = NULL;
 																				no* ancora = (no*)malloc(sizeof(no));
@@ -2099,6 +2108,7 @@ function_declaration:
 																				}
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,escopoArgs,tipoRetorno);
+																					numArgumentos = ContaFuncArgs($5);
 																					(*ancora).refereTabela->numArgs = numArgumentos;
 																				}
 																				if(numArgumentos > 0){
@@ -2138,8 +2148,8 @@ function_declaration:
 																				}
 																			}
 		OPENPAR funcargs CLOSEPAR  											{
-																				int numArgumentos;
-																				numArgumentos = ContaFuncArgs($5);
+																				int numArgumentos = 0;
+																				
 																				$1 = NULL;
 																				$4 = NULL;
 																				$6 = NULL;
@@ -2162,6 +2172,7 @@ function_declaration:
 																				}
 																				else{
 																					(*ancora).refereTabela = CriarSimboloFuncao($2,FUNC_TABLE,NULL,realEscopo,escopoArgs,Void);
+																					numArgumentos = ContaFuncArgs($5);
 																					(*ancora).refereTabela->numArgs = numArgumentos;
 																				}
 																				if(numArgumentos > 0){
@@ -2414,11 +2425,11 @@ matharg:
 										else{
 											printf("ERRO SEMANTICO! ID %s USADO FORA DE ESCOPO!\n",$1);
 											(*ancora).refereTabela = NULL;
+											(*ancora).tipoVirtual = ConverteTableTipo((*ancoraSimb).tipo);
 											errorCheck = TRUE;
 										}
 										(*ancora).valor = strdup($1);
 										(*ancora).conversion = None;
-										(*ancora).tipoVirtual = ConverteTableTipo((*ancoraSimb).tipo);
 										(*ancora).escopo = Top(pilhaEscopo)->valor;
 										free($1);
 										$$ = ancora;																
